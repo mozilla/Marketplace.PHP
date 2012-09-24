@@ -1,0 +1,167 @@
+<?php 
+/**
+ * A class to interact with Mozilla Marketplace API
+ *
+ * For full spec please read Marketplace API documentation
+ * https://github.com/mozilla/zamboni/blob/master/docs/topics/api.rst
+ */
+
+
+class Marketplace {
+
+	private $token;
+	private $oauth;
+
+	/**
+	 * Connect to the Marketplace and get the token
+	 *
+	 * @param	string		$domain
+	 * @param	string		$protocol
+	 * @param	integer		$port
+	 * @param	string		$prefix		a prefix to add before url path
+	 * @param	string		$consumer_key
+	 * @param	string		$consumer_secret
+	 */
+	function __construct(
+		$consumer_key, 
+		$consumer_secret,
+		$domain='marketplace.mozilla.org', 
+		$protocol='https', 
+		$port=443, 
+		$prefix='') {
+			$this->domain = $domain;
+			$this->protocol = $protocol;
+			$this->port = $port;
+			$this->prefix = $prefix;
+			$this->oauth = new OAuth($consumer_key, $consumer_secret,
+				OAUTH_SIG_METHOD_HMACSHA1,OAUTH_AUTH_TYPE_AUTHORIZATION);
+			$this->oauth->enableDebug();
+			$this->oauth->enableRedirects();
+			$this->oauth->disableSSLChecks();
+	}
+
+	function fetch($method, $url, $data=None) {
+		if ($data) {
+			$params = array('body' => json_encode($data));
+		} else {
+			$params = array();
+		}
+		echo $this->oauth->getRequestHeader($method, $url, $params)."\n\r";
+		return $this->oauth->fetch($url, $params, $method, array("Content-Type: application/json"));
+	}
+
+	/**
+	 * Creates a full URL to the API using urls dict
+	 */
+	private function get_url() {
+	}
+
+	/**
+	 * Order manifest validation
+	 *
+	 * @param	string		$manifest_url
+	 * @return	integer		manifest id	 
+	 */
+	public function validate_manifest($manifest_url) {
+	}
+
+	/**
+	 * Check if manifest is valid
+	 *
+	 * @param	integer		$manifest_id
+	 * @return  array		processed => bool
+	 *						valid => bool
+	 */
+	public function is_manifest_valid($manifest_id) {
+	}
+
+	/** 
+	 * Order webapp creation
+	 *
+	 * @param	integer		$manifest_id
+	 * @return	array		success (bool)
+	 *						id (string)				webapp id
+	 *						resource_uri (string)	
+	 *						slug (string)			unique name
+	 */
+	public function create_webapp($manifest_id) {
+	}
+
+	/**
+	 * Update webapp
+	 *
+	 * @param	string		$webapp_id
+	 * @param	array		$data some keys are required:
+	 *							name		title of the webapp (max 127 char)
+	 *							summary		(max 255 char)
+	 *							categories	a list of webapp category ids
+	 *										at least 2 are required
+	 *							support_email	
+	 *							device_type	a list of the device types
+	 *										at least on of 'desktop', 'phone',
+	 *										'tablet'
+	 *							payment_type 'free'
+	 * @return	array		success (bool)
+	 *						message (string)
+	 */
+	public function update_webapp($webapp_id, $data) {
+	}
+
+	/**
+	 * View details of a webapp
+	 *
+	 * @param	string		$webapp_id
+	 * @return	array		success
+	 *						other fields defining a webapp
+	 */
+	public function get_webapp_info($webapp_id) {
+	}
+
+	/**
+	 * Remove webapp from Marketplace
+	 *
+	 * @param	string		$webapp_id
+	 * @return	array		success (bool)
+	 *						message (string)
+	 */
+	public function remove_webapp($webapp_id) {
+	}
+
+	/**
+	 * Add screenshot to a webapp
+	 *
+	 * @param	string		$webapp_id
+	 * @param	string		$filepath
+	 * @param	integer		$position		on which position place the image
+	 */
+	public function add_screenshot($webapp_id, $filepath, $position = 1) {
+	}
+
+	/**
+	 * Get info about screenshot or video
+	 *
+	 * @param	string	$screenshot_id
+	 * @return	array	success (bool)
+	 *					other fields defining a screenshot
+	 */
+	public function get_screenshot_info($screenshot_id) {
+	}
+
+	/**
+	 * Remove screenshot from Marketplace
+	 *
+	 * @param	string	$screenshot_id
+	 * @return	array		success (bool)
+	 *						message (string)
+	 */
+	public function delete_screenshot($screenshot_id) {
+	}
+
+	/**
+	 * Get list of available categories
+	 *
+	 * @return	array	categories with the ids
+	 */
+	public function get_category_list() {
+	}
+};
