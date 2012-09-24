@@ -34,20 +34,33 @@ class Marketplace {
 			$this->port = $port;
 			$this->prefix = $prefix;
 			$this->oauth = new OAuth($consumer_key, $consumer_secret,
-				OAUTH_SIG_METHOD_HMACSHA1,OAUTH_AUTH_TYPE_AUTHORIZATION);
+				OAUTH_SIG_METHOD_HMACSHA1);
 			$this->oauth->enableDebug();
 			$this->oauth->enableRedirects();
 			$this->oauth->disableSSLChecks();
 	}
 
+	/**
+	 * Fetch data from the JSON API
+	 * TODO: make it private
+	 *		 it's not private for testing reasons only
+	 * 
+	 * @param	string		$method
+	 * @param	string		$url	
+	 * @param	array		$data		data to send to the API, it's gonna
+	 *									be JSON encoded
+	 * @return  mixed		response from the API
+	 */
 	function fetch($method, $url, $data=None) {
 		if ($data) {
 			$params = array('body' => json_encode($data));
 		} else {
 			$params = array();
 		}
-		echo $this->oauth->getRequestHeader($method, $url, $params)."\n\r";
-		return $this->oauth->fetch($url, $params, $method, array("Content-Type: application/json"));
+		return $this->oauth->fetch($url, $params, $method, 
+			array(
+				"Accept" => "application/json", 
+				"Content-Type" => "application/json"));
 	}
 
 	/**
