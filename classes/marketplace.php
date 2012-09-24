@@ -51,7 +51,7 @@ class Marketplace {
      *                                    be JSON encoded
      * @return  mixed        response from the API
      */
-    function fetch($method, $url, $data=None) {
+    function fetch($method, $url, $data=NULL) {
         if ($data) {
             $params = array('body' => json_encode($data));
         } else {
