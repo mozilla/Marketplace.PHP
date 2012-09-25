@@ -11,14 +11,14 @@ class Marketplace {
 
     private $token;
     private $oauth;
-	private $urls = array(
-		'validate' => '/apps/validation/',
-		'validation_result' => '/apps/validation/%s/',
-		'create' => '/apps/app/',
-		'app' => '/apps/app/%s/',
-		'create_screenshot' => '/apps/preview/?app=%s',
-		'screenshot' => '/apps/preview/%s/',
-		'categories' => '/apps/category/');
+    private $urls = array(
+        'validate' => '/apps/validation/',
+        'validation_result' => '/apps/validation/%s/',
+        'create' => '/apps/app/',
+        'app' => '/apps/app/%s/',
+        'create_screenshot' => '/apps/preview/?app=%s',
+        'screenshot' => '/apps/preview/%s/',
+        'categories' => '/apps/category/');
 
     /**
      * Connect to the Marketplace and get the token
@@ -36,17 +36,17 @@ class Marketplace {
         $domain='marketplace.mozilla.org', 
         $protocol='https', 
         $port=443, 
-		$prefix='') 
-	{
-		$this->domain = $domain;
-		$this->protocol = $protocol;
-		$this->port = $port;
-		$this->prefix = $prefix;
-		$this->oauth = new OAuth($consumer_key, $consumer_secret,
-			OAUTH_SIG_METHOD_HMACSHA1);
-		$this->oauth->enableDebug();
-		$this->oauth->enableRedirects();
-		$this->oauth->disableSSLChecks();
+        $prefix='') 
+    {
+        $this->domain = $domain;
+        $this->protocol = $protocol;
+        $this->port = $port;
+        $this->prefix = $prefix;
+        $this->oauth = new OAuth($consumer_key, $consumer_secret,
+            OAUTH_SIG_METHOD_HMACSHA1);
+        $this->oauth->enableDebug();
+        $this->oauth->enableRedirects();
+        $this->oauth->disableSSLChecks();
     }
 
     /**
@@ -60,8 +60,8 @@ class Marketplace {
      *                                    be JSON encoded
      * @return  mixed        response from the API
      */
-	function fetch($method, $url, $data=NULL) 
-	{
+    function fetch($method, $url, $data=NULL) 
+    {
         if ($data) {
             $params = array('body' => json_encode($data));
         } else {
@@ -76,10 +76,10 @@ class Marketplace {
     /**
      * Creates a full URL to the API using urls dict
      */
-	private function get_url($key) 
-	{
-		return $this->protocol.'://'.$this->domain.':'.$this->port
-			.'/'.$this->prefix.'/api'.$this->urls[$key];
+    private function get_url($key) 
+    {
+        return $this->protocol.'://'.$this->domain.':'.$this->port
+            .'/'.$this->prefix.'/api'.$this->urls[$key];
     }
 
     /**
@@ -88,12 +88,12 @@ class Marketplace {
      * @param    string        $manifest_url
      * @return    integer        manifest id     
      */
-	public function validate_manifest($manifest_url) 
-	{
-		$url = $this->get_url('validate');
-		$data = array('manifest' => $manifest_url);
-		$response = $this->fetch('POST', $url, $data);
-		
+    public function validate_manifest($manifest_url) 
+    {
+        $url = $this->get_url('validate');
+        $data = array('manifest' => $manifest_url);
+        $response = $this->fetch('POST', $url, $data);
+        
     }
 
     /**
@@ -103,8 +103,8 @@ class Marketplace {
      * @return  array        processed => bool
      *                        valid => bool
      */
-	public function is_manifest_valid($manifest_id) 
-	{
+    public function is_manifest_valid($manifest_id) 
+    {
     }
 
     /** 
@@ -116,8 +116,8 @@ class Marketplace {
      *                        resource_uri (string)    
      *                        slug (string)            unique name
      */
-	public function create_webapp($manifest_id) 
-	{
+    public function create_webapp($manifest_id) 
+    {
     }
 
     /**
@@ -137,8 +137,8 @@ class Marketplace {
      * @return    array        success (bool)
      *                        message (string)
      */
-	public function update_webapp($webapp_id, $data) 
-	{
+    public function update_webapp($webapp_id, $data) 
+    {
     }
 
     /**
@@ -148,8 +148,8 @@ class Marketplace {
      * @return    array        success
      *                        other fields defining a webapp
      */
-	public function get_webapp_info($webapp_id) 
-	{
+    public function get_webapp_info($webapp_id) 
+    {
     }
 
     /**
@@ -159,8 +159,8 @@ class Marketplace {
      * @return    array        success (bool)
      *                        message (string)
      */
-	public function remove_webapp($webapp_id) 
-	{
+    public function remove_webapp($webapp_id) 
+    {
     }
 
     /**
@@ -170,8 +170,8 @@ class Marketplace {
      * @param    string        $filepath
      * @param    integer        $position        on which position place the image
      */
-	public function add_screenshot($webapp_id, $filepath, $position = 1) 
-	{
+    public function add_screenshot($webapp_id, $filepath, $position = 1) 
+    {
     }
 
     /**
@@ -181,8 +181,8 @@ class Marketplace {
      * @return    array    success (bool)
      *                    other fields defining a screenshot
      */
-	public function get_screenshot_info($screenshot_id) 
-	{
+    public function get_screenshot_info($screenshot_id) 
+    {
     }
 
     /**
@@ -192,8 +192,8 @@ class Marketplace {
      * @return    array        success (bool)
      *                        message (string)
      */
-	public function delete_screenshot($screenshot_id) 
-	{
+    public function delete_screenshot($screenshot_id) 
+    {
     }
 
     /**
@@ -201,7 +201,7 @@ class Marketplace {
      *
      * @return    array    categories with the ids
      */
-	public function get_category_list() 
-	{
+    public function get_category_list() 
+    {
     }
 };

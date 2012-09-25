@@ -17,7 +17,7 @@ $body = json_encode(array('manifest' => $url));
 $params = array('body' => $body);
 
 $headers = array(
-	'Accept' => 'application/json',
-	'Content-Type' => 'application/json');
+    'Accept' => 'application/json',
+    'Content-Type' => 'application/json');
 
 $oauth->fetch($url, $params, 'POST', $headers);
