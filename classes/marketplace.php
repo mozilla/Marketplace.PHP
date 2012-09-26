@@ -44,33 +44,51 @@ class Marketplace {
         $this->prefix = $prefix;
         $this->oauth = new OAuth($consumer_key, $consumer_secret,
             OAUTH_SIG_METHOD_HMACSHA1);
-        $this->oauth->enableDebug();
-        $this->oauth->enableRedirects();
-        $this->oauth->disableSSLChecks();
     }
 
     /**
      * Fetch data from the JSON API
-     * TODO: make it private
-     *         it's not private for testing reasons only
      * 
-     * @param    string        $method
+     * @param    string        $method      uppercase REST method name 
+     *                                      (POST,GET,DELETE,UPDATE)
      * @param    string        $url    
-     * @param    array        $data        data to send to the API, it's gonna
-     *                                    be JSON encoded
+     * @param    array        $data         data to send to the API, it's gonna
+     *                                      be JSON encoded
      * @return  mixed        response from the API
      */
-    function fetch($method, $url, $data=NULL) 
+    private function fetch($method, $url, $data=NULL) 
     {
         if ($data) {
-            $params = array('body' => json_encode($data));
+            $body = json_encode($data);
         } else {
-            $params = array();
+            $body = '';
         }
-        return $this->oauth->fetch($url, $params, $method, 
-            array(
-                "Accept" => "application/json", 
-                "Content-Type" => "application/json"));
+        // TODO: consider not using the OAuth lib as it's used for
+        //       getting the header only
+        $OA_header = $this->oauth->getRequestHeader($method, $url);
+        $headers = array(
+            "Content-Type: application/json", 
+            "Authorization: $OA_header",
+            "Accept: application/json");
+
+        $ch = curl_init();
+        curl_setopt_array($ch, array(
+            CURLOPT_URL => $url,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_RETURNTRANSFER => 1,
+            CURLOPT_SSL_VERIFYPEER => 0));
+
+        if ($method === 'POST') {
+            curl_setopt_array($ch, array(
+            CURLOPT_POST => 1,
+            CURLOPT_POSTFIELDS => $body));
+        }
+        $response = curl_exec($ch);
+        $info = curl_getinfo($ch);
+        curl_close($ch);
+        return array(
+            'status_code' => $info['http_code'], 
+            'body' => $response);
     }
 
     /**
@@ -79,7 +97,7 @@ class Marketplace {
     private function get_url($key) 
     {
         return $this->protocol.'://'.$this->domain.':'.$this->port
-            .'/'.$this->prefix.'/api'.$this->urls[$key];
+            .$this->prefix.'/api'.$this->urls[$key];
     }
 
     /**
@@ -93,7 +111,8 @@ class Marketplace {
         $url = $this->get_url('validate');
         $data = array('manifest' => $manifest_url);
         $response = $this->fetch('POST', $url, $data);
-        
+        // TODO: check the response and act accordingly
+        return $response;
     }
 
     /**

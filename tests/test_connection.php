@@ -3,21 +3,40 @@
  * This is a demonstration of a falling attempt to authorize in the marketplace
  */
 
-$consumer_key = 'aaa';
-$consumer_secret = 'bbb';
+$consumer_key = 'your_key';
+$consumer_secret = 'your_secret';
 $url = 'https://marketplace-dev.allizom.org:443/api/apps/validation/';
 $manifest = 'http://mozilla.github.com/MarketplaceClientExample/manifest.webapp';
 
 $oauth = new OAuth($consumer_key, $consumer_secret, OAUTH_SIG_METHOD_HMACSHA1);
-$oauth->enableDebug();
-$oauth->enableRedirects();
-$oauth->disableSSLChecks();
 
-$body = json_encode(array('manifest' => $url));
-$params = array('body' => $body);
+$body = json_encode(array('manifest' => $manifest));
 
-$headers = array(
-    'Accept' => 'application/json',
-    'Content-Type' => 'application/json');
+$OA_header = $oauth->getRequestHeader('POST', $url);
 
-$oauth->fetch($url, $params, 'POST', $headers);
+// idea to use curl from
+// http://api.figshare.com/docs/demo_php.html
+$headers = array("Content-Type: application/json", "Authorization: $OA_header");
+
+$ch = curl_init();
+curl_setopt_array($ch, array(
+    CURLOPT_URL => $url,
+    CURLOPT_HTTPHEADER => $headers,
+    CURLOPT_POST => 1,
+    CURLOPT_POSTFIELDS => $body,
+    CURLOPT_RETURNTRANSFER => 1,
+    CURLOPT_SSL_VERIFYPEER => 0));
+
+$response = curl_exec($ch);
+
+var_dump(curl_getinfo($ch));
+
+curl_close($ch);
+
+var_dump($response);
+
+// $headers = array(
+//     'Accept' => 'application/json',
+//     'Content-Type' => 'application/json');
+// 
+// $oauth->fetch($url, $params, 'POST', $headers);
