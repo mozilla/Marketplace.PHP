@@ -35,6 +35,7 @@ curl_close($ch);
 
 var_dump($response);
 
+// old (cleaner) way which for some reason isn't working 
 // $headers = array(
 //     'Accept' => 'application/json',
 //     'Content-Type' => 'application/json');

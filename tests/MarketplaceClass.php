@@ -88,4 +88,16 @@ class MarketplaceTest extends PHPUnit_Framework_TestCase
                 'http://domain:80/prefix/api'.$urls[$key]);
         }
     }
+
+    public function testcreateApp()
+    {
+        $response_body = '{"categories": [], "description": null, "device_types": [], "homepage": null, "id": "123456", "manifest": "abcdefghijklmnopqrstuvwxyz123456", "name": "MozillaBall", "premium_type": "free", "previews": [], "privacy_policy": null, "resource_uri": "/api/apps/app/123456/", "slug": "mozillaball-1", "status": 0, "summary": "Exciting Open Web development action!", "support_email": null, "support_url": null}';
+        $stub = $this->getCurlMockFetchReturn(array('status_code' => 201, 'body' => $response_body));
+        $marketplace = new Marketplace('key', 'secret', 'domain', 'http', 443, '', $stub);
+        $response = $marketplace->createWebapp("abcdefghijklmnopqrstuvwxyz123456");
+        $this->assertEquals($response['success'], true);
+        $this->assertEquals($response['manifest'], 'abcdefghijklmnopqrstuvwxyz123456');
+        $this->assertEquals($response['id'], '123456');
+        $this->assertEquals($response['resource_uri'], '/api/apps/app/123456/');
+    }
 }
