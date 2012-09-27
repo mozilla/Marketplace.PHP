@@ -105,10 +105,12 @@ class Marketplace {
     }
 
     /**
-     * Order manifest validation
+     * Manifest validation
      *
-     * @param    string        $manifest_url
-     * @return    integer        manifest id     
+     * @param    string         $manifest_url
+     * @return   array          success (bool)
+     *                          id (string)
+     *                          resource_uri (string)
      */
     public function validate_manifest($manifest_url) 
     {
@@ -124,6 +126,8 @@ class Marketplace {
                 'error' => $data->reason);
         } 
         $ret = array(
+            'success' => true,
+            'valid' => $data->valid,
             'id' => $data->id,
             'resource_uri' => $data->resource_uri);
         if ($data->valid === false) {
@@ -133,18 +137,17 @@ class Marketplace {
                     $errors[] = $msg->message;
                 }
             }
-            return array_merge(
-                $ret,
-                array(
-                    'success' => false,
-                    'errors' => $errors));
+            $ret['errors'] = $errors;
         }
-        return array(
-            'success' => true);
+        return $ret;
     }
 
     /**
-     * Check if manifest is valid
+     * Check if manifest is valid. 
+     * Check if manifest issued for validation is valid. Validate manifest is 
+     * currently working synchronously, but it might change to 
+     * asynchronus as it used to be before and this function will 
+     * become necessary.
      *
      * @param    integer        $manifest_id
      * @return  array        processed => bool
@@ -155,12 +158,13 @@ class Marketplace {
         $url = str_replace('{id}', $manifest_id, $this->get_url('validation_result'));
         $response = $this->fetch('GET', $url);
         $data = json_decode($response['body']);
-        if ($response['status_code'] !== 201) {
+        if ($response['status_code'] !== 200) {
             return array(
                 'status_code' => $response['status_code'],
                 'success' => false,
                 'error' => $data->reason);
         } 
+        return array('success' => true, 'valid' => $data->valid);
     }
 
     /** 
