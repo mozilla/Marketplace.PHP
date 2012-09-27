@@ -170,7 +170,6 @@ class Marketplace {
     private static function _getInfoFromData($data) {
         return array(
             'id' => $data->id,
-            'manifest' => $data->manifest,
             'resource_uri' => $data->resource_uri,
             'slug' => $data->slug,
             'name' => $data->name,
@@ -182,6 +181,7 @@ class Marketplace {
             'homepage' => $data->homepage,
             'device_types' => $data->device_types,
             'privacy_policy' => $data->privacy_policy,
+            'previews' => $data->previews,
             'support_email' => $data->support_email,
             'support_url' => $data->support_url);
     }
@@ -259,12 +259,25 @@ class Marketplace {
      * @return    array        success
      *                        other fields defining a webapp
      */
-    public function get_webapp_info($webapp_id) 
+    public function getWebappInfo($webapp_id) 
     {
+        $url = str_replace('{id}', $webapp_id, $this->get_url('app'));
+        $response = $this->fetch('GET', $url);
+
+        $data = json_decode($response['body']);
+        if ($response['status_code'] !== 200) {
+            return array(
+                'status_code' => $response['status_code'],
+                'success' => false,
+                'error' => $data->reason);
+        } 
+        $ret = array('success' => true);
+        return array_merge($ret, $this::_getInfoFromData($data));
     }
 
     /**
      * Remove webapp from Marketplace
+     * Not implemented yet
      *
      * @param    string        $webapp_id
      * @return    array        success (bool)
@@ -272,16 +285,17 @@ class Marketplace {
      */
     public function remove_webapp($webapp_id) 
     {
+        throw new Exception("Not Implemented");
     }
 
     /**
      * Add screenshot to a webapp
      *
-     * @param    string        $webapp_id
-     * @param    string        $filepath
-     * @param    integer        $position        on which position place the image
+     * @param    string     $webapp_id
+     * @param    resource   $handle     result of running an fopen 
+     * @param    integer    $position   on which position place the image
      */
-    public function add_screenshot($webapp_id, $filepath, $position = 1) 
+    public function add_screenshot($webapp_id, $handle, $position = 1) 
     {
     }
 
