@@ -217,20 +217,39 @@ class Marketplace {
      *
      * @param    string        $webapp_id
      * @param    array         $data some keys are required:
-     *                             name        title of the webapp (max 127 char)
-     *                             summary        (max 255 char)
+     *                             name          title of the webapp (max 127 char)
+     *                             summary       (max 255 char)
      *                             categories    a list of webapp category ids
-     *                                         at least 2 are required
+     *                                           at least 2 are required
      *                             support_email    
-     *                             device_type    a list of the device types
-     *                                         at least on of 'desktop', 'phone',
-     *                                        'tablet'
-     *                             payment_type 'free'
+     *                             device_types  a list of the device types
+     *                                           at least on of 'desktop', 'phone',
+     *                                           'tablet'
+     *                             payment_type  'free'
      * @return    array        success (bool)
      *                         message (string)
      */
-    public function update_webapp($webapp_id, $data) 
+    public function updateWebapp($webapp_id, $data) 
     {
+        // validate entry
+        $required = array('name', 'summary', 'categories', 'privacy_policy',
+            'support_email', 'device_types', 'payment_type');
+        $diff = array_diff($required, array_keys($data));
+        if ($diff) {
+            throw new InvalidArgumentException(
+                'Following keys are required: '. implode(', ', $diff));
+        }
+        // PUT data
+        $url = str_replace('{id}', $webapp_id, $this->get_url('app'));
+        $response = $this->fetch('PUT', $url, $data);
+
+        if ($response['status_code'] !== 202) {
+            return array(
+                'status_code' => $response['status_code'],
+                'success' => false,
+                'error' => $data->reason);
+        } 
+        return array('success' => true);
     }
 
     /**
