@@ -19,8 +19,7 @@ class Marketplace {
         'app' => '/apps/app/{id}/',
         'create_screenshot' => '/apps/preview/?app={id}',
         'screenshot' => '/apps/preview/{id}/',
-        'categories' => '/apps/category/');
-
+        'categories' => '/apps/category/?limit={limit}&offset={offset}'); 
     /**
      * Connect to the Marketplace and get the token
      *
@@ -97,11 +96,21 @@ class Marketplace {
 
     /**
      * Creates a full URL to the API using urls dict
+     *
+     * @param   string      $key
+     * @param   array       $replace    replace key with value
      */
-    private function get_url($key) 
+    private function get_url($key, $replace=array()) 
     {
-        return $this->protocol.'://'.$this->domain.':'.$this->port
+        $url = $this->protocol.'://'.$this->domain.':'.$this->port
             .$this->prefix.'/api'.$this->urls[$key];
+        if ($replace) {
+            $url = str_replace(
+                array_keys($replace), 
+                array_values($replace), 
+                $url);
+        }
+        return $url;
     }
 
     /**
@@ -170,7 +179,6 @@ class Marketplace {
     private static function _getInfoFromData($data) {
         return array(
             'id' => $data->id,
-            'manifest' => $data->manifest,
             'resource_uri' => $data->resource_uri,
             'slug' => $data->slug,
             'name' => $data->name,
@@ -182,6 +190,7 @@ class Marketplace {
             'homepage' => $data->homepage,
             'device_types' => $data->device_types,
             'privacy_policy' => $data->privacy_policy,
+            'previews' => $data->previews,
             'support_email' => $data->support_email,
             'support_url' => $data->support_url);
     }
@@ -259,30 +268,87 @@ class Marketplace {
      * @return    array        success
      *                        other fields defining a webapp
      */
-    public function get_webapp_info($webapp_id) 
+    public function getWebappInfo($webapp_id) 
     {
+        $url = str_replace('{id}', $webapp_id, $this->get_url('app'));
+        $response = $this->fetch('GET', $url);
+
+        $data = json_decode($response['body']);
+        if ($response['status_code'] !== 200) {
+            return array(
+                'status_code' => $response['status_code'],
+                'success' => false,
+                'error' => $data->reason);
+        } 
+        $ret = array('success' => true);
+        return array_merge($ret, $this::_getInfoFromData($data));
     }
 
     /**
      * Remove webapp from Marketplace
+     * Not implemented yet
      *
      * @param    string        $webapp_id
      * @return    array        success (bool)
      *                        message (string)
      */
-    public function remove_webapp($webapp_id) 
+    public function removeWebapp($webapp_id) 
     {
+        throw new Exception("Not Implemented");
+    }
+
+    private function _getScreeshotInfoFromData($data) 
+    {
+        return array(
+            'id' => $data->id,
+            'resource_uri' => $data->resource_uri,
+            'image_url' => $data->image_url,
+            'thumbnail_url' => $data->thumbnail_url,
+            'filetype' => $data->filetype);
     }
 
     /**
      * Add screenshot to a webapp
      *
-     * @param    string        $webapp_id
-     * @param    string        $filepath
-     * @param    integer        $position        on which position place the image
+     * TODO: add ability to send videos
+     *
+     * @param    string     $webapp_id
+     * @param    resource   $handle     A file system pointer resource that 
+     *                                  is typically created using fopen().
+     * @param    integer    $position   on which position place the image
      */
-    public function add_screenshot($webapp_id, $filepath, $position = 1) 
+    public function addScreenshot($webapp_id, $handle, $position = 1) 
     {
+        // handle doesn't have to be a filesystem file.
+        $content = stream_get_contents($handle);
+        // content needs to be encoded to upload
+        $content_encoded = base64_encode($content);
+        $imginfo = getimagesizefromstring($content);
+
+        if (!$imginfo) {
+            throw new Exception("Wrong file");
+        }
+        
+        $url = str_replace('{id}', $webapp_id, $this->get_url('create_screenshot'));
+        // prepare data
+        $data = array(
+            'position' => $position,
+            'file' => array(
+                'type' => $imginfo['mime'],
+                'data' => $content_encoded));
+
+        $response = $this->fetch('POST', $url, $data);
+
+        $body = json_decode($response['body']);
+        if ($response['status_code'] !== 201) {
+            return array(
+                'status_code' => $response['status_code'],
+                'success' => false,
+                'error' => $body->reason);
+        } 
+        return array_merge(
+            array('success' => true), 
+            $this->_getScreeshotInfoFromData($body));
     }
 
     /**
@@ -292,27 +358,84 @@ class Marketplace {
      * @return    array    success (bool)
      *                    other fields defining a screenshot
      */
-    public function get_screenshot_info($screenshot_id) 
+    public function getScreenshotInfo($screenshot_id) 
     {
+        $url = str_replace('{id}', $screenshot_id, $this->get_url('screenshot'));
+        $response = $this->fetch('GET', $url);
+
+        $body = json_decode($response['body']);
+        if ($response['status_code'] !== 200) {
+            return array(
+                'status_code' => $response['status_code'],
+                'success' => false,
+                'error' => $body->reason);
+        } 
+        return array_merge(
+            array('success' => true), 
+            $this->_getScreeshotInfoFromData($body));
     }
 
     /**
      * Remove screenshot from Marketplace
+     * TODO: FIX IT! find the reason why it's not working on -dev
      *
      * @param    string    $screenshot_id
      * @return    array        success (bool)
      *                        message (string)
      */
-    public function delete_screenshot($screenshot_id) 
+    public function deleteScreenshot($screenshot_id) 
     {
+        $url = str_replace('{id}', $screenshot_id, $this->get_url('screenshot'));
+        $response = $this->fetch('DELETE', $url);
+
+        $body = json_decode($response['body']);
+        if ($response['status_code'] !== 204) {
+            return array(
+                'status_code' => $response['status_code'],
+                'success' => false,
+                'error' => $body->reason);
+        } 
+        return array('success' => true);
     }
 
     /**
      * Get list of available categories
      *
-     * @return    array    categories with the ids
+     * @param       int         $limit
+     * @param       int         $offset   
+     * @return      array       categories with the ids
      */
-    public function get_category_list() 
+    public function getCategoryList($limit=20, $offset=0) 
     {
+        $replace = array(
+            'limit' => $limit,
+            'offset' => $offset);
+        $url = $this->get_url('categories', $replace);
+
+        $response = $this->fetch('GET', $url);
+
+        $body = json_decode($response['body']);
+        if ($response['status_code'] !== 200) {
+            return array(
+                'status_code' => $response['status_code'],
+                'success' => false,
+                'error' => $body->reason);
+        } 
+        $ret = array(
+            'success' => true,
+            'pager' => array(
+                'limit' => $body->meta->limit,
+                'offset' => $body->meta->offset,
+                'total_count' => $body->meta->total_count,
+                'next' => $body->meta->next,
+                'previous' => $body->meta->previous),
+            'categories' => array());
+        foreach ($body->objects as $cat) {
+            $ret['categories'][] = array(
+                'id' => $cat->id,
+                'resource_uri' => $cat->resource_uri,
+                'name' => $cat->name);
+        }
+        return $ret;
     }
 };
