@@ -167,38 +167,89 @@ class Marketplace {
         return array('success' => true, 'valid' => $data->valid);
     }
 
+    private static function _getInfoFromData($data) {
+        return array(
+            'id' => $data->id,
+            'manifest' => $data->manifest,
+            'resource_uri' => $data->resource_uri,
+            'slug' => $data->slug,
+            'name' => $data->name,
+            'status' => $data->status,
+            'categories' => $data->categories,
+            'summary' => $data->summary,
+            'description' => $data->description,
+            'premium_type' => $data->premium_type,
+            'homepage' => $data->homepage,
+            'device_types' => $data->device_types,
+            'privacy_policy' => $data->privacy_policy,
+            'support_email' => $data->support_email,
+            'support_url' => $data->support_url);
+    }
+
     /** 
      * Order webapp creation
      *
      * @param    integer        $manifest_id
-     * @return    array        success (bool)
-     *                        id (string)                webapp id
-     *                        resource_uri (string)    
-     *                        slug (string)            unique name
+     * @return    array         success (bool)
+     *                          id (string)                webapp id
+     *                          resource_uri (string)    
+     *                          slug (string)            unique name
+     *                          ... other fields provided by 
+     *                          _getInfoFromData
      */
-    public function create_webapp($manifest_id) 
+    public function createWebapp($manifest_id) 
     {
+        $url = $this->get_url('create');
+        $response = $this->fetch('POST', $url, array('manifest' => $manifest_id));
+        $data = json_decode($response['body']);
+        if ($response['status_code'] !== 201) {
+            return array(
+                'status_code' => $response['status_code'],
+                'success' => false,
+                'error' => $data->reason);
+        } 
+        $ret = array('success' => true);
+        return array_merge($ret, $this::_getInfoFromData($data));
     }
 
     /**
      * Update webapp
      *
      * @param    string        $webapp_id
-     * @param    array        $data some keys are required:
-     *                            name        title of the webapp (max 127 char)
-     *                            summary        (max 255 char)
-     *                            categories    a list of webapp category ids
-     *                                        at least 2 are required
-     *                            support_email    
-     *                            device_type    a list of the device types
-     *                                        at least on of 'desktop', 'phone',
-     *                                        'tablet'
-     *                            payment_type 'free'
+     * @param    array         $data some keys are required:
+     *                             name          title of the webapp (max 127 char)
+     *                             summary       (max 255 char)
+     *                             categories    a list of webapp category ids
+     *                                           at least 2 are required
+     *                             support_email    
+     *                             device_types  a list of the device types
+     *                                           at least on of 'desktop', 'phone',
+     *                                           'tablet'
+     *                             payment_type  'free'
      * @return    array        success (bool)
-     *                        message (string)
+     *                         message (string)
      */
-    public function update_webapp($webapp_id, $data) 
+    public function updateWebapp($webapp_id, $data) 
     {
+        // validate entry
+        $required = array('name', 'summary', 'categories', 'privacy_policy',
+            'support_email', 'device_types', 'payment_type');
+        $diff = array_diff($required, array_keys($data));
+        if ($diff) {
+            throw new InvalidArgumentException(
+                'Following keys are required: '. implode(', ', $diff));
+        }
+        // PUT data
+        $url = str_replace('{id}', $webapp_id, $this->get_url('app'));
+        $response = $this->fetch('PUT', $url, $data);
+
+        if ($response['status_code'] !== 202) {
+            return array(
+                'status_code' => $response['status_code'],
+                'success' => false,
+                'error' => $data->reason);
+        } 
+        return array('success' => true);
     }
 
     /**
