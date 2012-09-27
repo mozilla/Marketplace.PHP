@@ -1,19 +1,60 @@
 <?php
 require_once 'PHPUnit/Autoload.php';
 require_once 'classes/marketplace.php';
+require_once 'classes/curl.php';
+
+// Note: valid manifest url:
+// http://mozilla.github.com/MarketplaceClientExample/manifest.webapp
 
 class MarketplaceTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * validate_manifest should throw exception if not authorized
+     * Prepare the stub to be injected into marketplace object
      */
-    public function testExceptionInValidateManifest()
+    private function getCurlMock() 
     {
-        $s_key = 'fake_key';
-        $s_secret = 'fake_security';
-        $marketplace = new Marketplace($s_key, $s_secret, 'marketplace-dev.allizom.org');
+        return $this->getMockBuilder('Curl')
+            ->setConstructorArgs(array('http://example.com', 'GET', array(), ''))
+            ->setMethods(array('fetch'))
+            ->getMock();
+    }
+    private function getCurlMockFetchReturn($return_value)
+    {
+        $stub = $this->getCurlMock();
+        $stub->expects($this->any())
+                 ->method('fetch')
+                 ->will($this->returnValue($return_value));
+        return $stub;
+    }
+
+    /**
+     * On every Http status code >= 400 Marketplace::fetch is throwing 
+     * an exception
+     *
+     * @expectedException       Exception
+     * @expectedExceptionCode   401
+     */
+    public function testUnauthorizedAccess()
+    {
+        $e_msg = '{"reason": "Error with OAuth headers"}';
+        $stub = $this->getCurlMockFetchReturn(array('status_code' => 401, 'body' => $e_msg));
+        $marketplace = new Marketplace('key', 'secret', 'domain', 'http', 443, '', $stub);
+        $result = $marketplace->is_manifest_valid('abc');
+    }
+
+    /**
+     * invalid manifest should return success == false and list of 
+     * validation errors
+     */
+    public function testInvalidManifest()
+    {
+        $response_body = '{"id": "abcdefghijklmnopqrstuvwxyz123456", "manifest": "http://example.com", "processed": true, "resource_uri": "/api/apps/validation/abcdefghijklmnopqrstuvwxyz123456/", "valid": false, "validation": {"errors": 1, "messages": [{"message": "No manifest was found at that URL. Check the address and make sure the manifest is served with the HTTP header \"Content-Type: application/x-web-app-manifest+json\".", "tier": 1, "type": "error"}], "success": false}}';
+
+        $stub = $this->getCurlMockFetchReturn(array('status_code' => 201, 'body' => $response_body));
+        $marketplace = new Marketplace('key', 'secret', 'domain', 'http', 443, '', $stub);
         $response = $marketplace->validate_manifest('http://example.com');
-        var_dump($response);
+        $this->assertEquals($response['success'], false);
+        $this->assertEquals(count($response['errors']), 1);
     }
 
     public function testGetUrls()

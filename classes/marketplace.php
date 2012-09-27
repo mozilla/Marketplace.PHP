@@ -6,6 +6,7 @@
  * https://github.com/mozilla/zamboni/blob/master/docs/topics/api.rst
  */
 
+require_once 'curl.php';
 
 class Marketplace {
 
@@ -13,11 +14,11 @@ class Marketplace {
     private $oauth;
     private $urls = array(
         'validate' => '/apps/validation/',
-        'validation_result' => '/apps/validation/%s/',
+        'validation_result' => '/apps/validation/{id}/',
         'create' => '/apps/app/',
-        'app' => '/apps/app/%s/',
-        'create_screenshot' => '/apps/preview/?app=%s',
-        'screenshot' => '/apps/preview/%s/',
+        'app' => '/apps/app/{id}/',
+        'create_screenshot' => '/apps/preview/?app={id}',
+        'screenshot' => '/apps/preview/{id}/',
         'categories' => '/apps/category/');
 
     /**
@@ -36,7 +37,8 @@ class Marketplace {
         $domain='marketplace.mozilla.org', 
         $protocol='https', 
         $port=443, 
-        $prefix='') 
+        $prefix='',
+        $curl=NULL) 
     {
         $this->domain = $domain;
         $this->protocol = $protocol;
@@ -44,6 +46,8 @@ class Marketplace {
         $this->prefix = $prefix;
         $this->oauth = new OAuth($consumer_key, $consumer_secret,
             OAUTH_SIG_METHOD_HMACSHA1);
+        // adding a stub to the system
+        $this->curl = $curl;
     }
 
     /**
@@ -71,24 +75,24 @@ class Marketplace {
             "Authorization: $OA_header",
             "Accept: application/json");
 
-        $ch = curl_init();
-        curl_setopt_array($ch, array(
-            CURLOPT_URL => $url,
-            CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_RETURNTRANSFER => 1,
-            CURLOPT_SSL_VERIFYPEER => 0));
-
-        if ($method === 'POST') {
-            curl_setopt_array($ch, array(
-            CURLOPT_POST => 1,
-            CURLOPT_POSTFIELDS => $body));
+        // to allow testing
+        if ($this->curl) {
+            $curl = $this->curl;
+        } else {
+            $curl = new Curl($url, $method, $headers, $body);
         }
-        $response = curl_exec($ch);
-        $info = curl_getinfo($ch);
-        curl_close($ch);
-        return array(
-            'status_code' => $info['http_code'], 
-            'body' => $response);
+        $response = $curl->fetch();
+        // throw on 40x and 50x errors
+        if ($response['status_code'] >= 400) {
+            try {
+                $body = json_decode($response['body']);
+                $reason = $body->reason;
+            } catch (Exception $e) {
+                $reason = $response['body'];
+            }
+            throw new Exception($reason, $response['status_code']);
+        }
+        return $response;
     }
 
     /**
@@ -111,8 +115,32 @@ class Marketplace {
         $url = $this->get_url('validate');
         $data = array('manifest' => $manifest_url);
         $response = $this->fetch('POST', $url, $data);
-        // TODO: check the response and act accordingly
-        return $response;
+        $data = json_decode($response['body']);
+        // the expected status code is 201, everything else is an error
+        if ($response['status_code'] !== 201) {
+            return array(
+                'status_code' => $response['status_code'],
+                'success' => false,
+                'error' => $data->reason);
+        } 
+        $ret = array(
+            'id' => $data->id,
+            'resource_uri' => $data->resource_uri);
+        if ($data->valid === false) {
+            $errors = array();
+            foreach ($data->validation->messages as $msg) {
+                if ($msg->type === 'error') {
+                    $errors[] = $msg->message;
+                }
+            }
+            return array_merge(
+                $ret,
+                array(
+                    'success' => false,
+                    'errors' => $errors));
+        }
+        return array(
+            'success' => true);
     }
 
     /**
@@ -124,6 +152,15 @@ class Marketplace {
      */
     public function is_manifest_valid($manifest_id) 
     {
+        $url = str_replace('{id}', $manifest_id, $this->get_url('validation_result'));
+        $response = $this->fetch('GET', $url);
+        $data = json_decode($response['body']);
+        if ($response['status_code'] !== 201) {
+            return array(
+                'status_code' => $response['status_code'],
+                'success' => false,
+                'error' => $data->reason);
+        } 
     }
 
     /** 
