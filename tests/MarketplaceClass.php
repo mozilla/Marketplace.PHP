@@ -134,4 +134,64 @@ class MarketplaceTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($response['id'], '123456');
         $this->assertEquals($response['resource_uri'], '/api/apps/app/123456/');
     }
+
+    /**
+     * @expectedException           Exception
+     * #expectedExceptionMessage    Not Implemented
+     */
+    public function testRemoveWebappNotImplemented() {
+        $marketplace = new Marketplace('key', 'secret');
+        $marketplace->removeWebapp(123);
+    }
+
+    public function testUploadScreenshot() {
+        $response_body = '{"filetype": "image/png", "id": "12345", "image_url": "https://marketplace-dev-cdn.allizom.org/img/uploads/previews/full/12/12345?modified=1348819526", "position": 1, "resource_uri": "/api/apps/preview/12345/", "thumbnail_url": "https://marketplace-dev-cdn.allizom.org/img/uploads/previews/thumbs/12/12345?modified=1348819526"}';
+        $img = "tests/mozilla.png";
+        $handle = fopen($img, 'r');
+        $stub = $this->getCurlMockFetchReturn(array('status_code' => 201, 'body' => $response_body));
+        $marketplace = new Marketplace('key', 'secret', 'domain', 'http', 443, '', $stub);
+        $response = $marketplace->addScreenshot(12345, $handle);
+        fclose($handle);
+        $this->assertEquals($response['id'], 12345);
+        $this->assertEquals($response['resource_uri'], "/api/apps/preview/12345/");
+    }
+
+    /**
+     * @expectedException           Exception
+     * @expectedExceptionMessage    Wrong file
+     */
+    public function testUploadWrongFile() {
+        $img = "tests/MarketplaceClass.php";
+        $handle = fopen($img, 'r');
+        $marketplace = new Marketplace('key', 'secret');
+        $response = $marketplace->addScreenshot(12345, $handle);
+        fclose($handle);
+    }
+
+    public function testGetScreenshotInfo() {
+        $response_body = '{"filetype": "image/png", "id": "12345", "image_url": "https://marketplace-dev-cdn.allizom.org/img/uploads/previews/full/12/12345?modified=1348819526", "resource_uri": "/api/apps/preview/12345/", "thumbnail_url": "https://marketplace-dev-cdn.allizom.org/img/uploads/previews/thumbs/12/12345?modified=1348819526"}';
+        $stub = $this->getCurlMockFetchReturn(array('status_code' => 200, 'body' => $response_body));
+        $marketplace = new Marketplace('key', 'secret', 'domain', 'http', 443, '', $stub);
+        $result = $marketplace->getScreenshotInfo(12345);
+        $this->assertEquals($result['id'], 12345);
+    }
+
+    public function testDeleteScreenshot() {
+        $stub = $this->getCurlMockFetchReturn(array('status_code' => 204, 'body' => ''));
+        $marketplace = new Marketplace('key', 'secret', 'domain', 'http', 443, '', $stub);
+        $response = $marketplace->deleteScreenshot(12345);
+        $this->assertEquals($response['success'], true);
+    }
+
+    public function testGetCategories() {
+        $response_body = '{"meta": {"limit": 20, "next": null, "offset": 0, "previous": null, "total_count": 6}, "objects": [{"id": "154", "name": "Business", "resource_uri": "/api/apps/category/154/"}, {"id": "155", "name": "Games", "resource_uri": "/api/apps/category/155/"}, {"id": "156", "name": "Music", "resource_uri": "/api/apps/category/156/"}, {"id": "160", "name": "Travel", "resource_uri": "/api/apps/category/160/"}, {"id": "163", "name": "Education", "resource_uri": "/api/apps/category/163/"}, {"id": "169", "name": "Vivo", "resource_uri": "/api/apps/category/169/"}]}';
+        $stub = $this->getCurlMockFetchReturn(array('status_code' => 200, 'body' => $response_body));
+        $marketplace = new Marketplace('key', 'secret', 'domain', 'http', 443, '', $stub);
+        $result = $marketplace->getCategoryList();
+        $this->assertTrue($result['success']);
+        $this->assertEquals(count($result['categories']), 6);
+        $this->assertTrue(array_key_exists('id', $result['categories'][0]));
+        $this->assertTrue(array_key_exists('resource_uri', $result['categories'][0]));
+        $this->assertTrue(array_key_exists('name', $result['categories'][0]));
+    }
 }
