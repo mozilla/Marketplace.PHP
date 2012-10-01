@@ -1,7 +1,7 @@
 <?php
 namespace Marketplace;
 
-class Client extends \Exception { }
+class FetchException extends \Exception { }
 
 class Client
 {

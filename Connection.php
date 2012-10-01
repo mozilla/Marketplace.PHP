@@ -1,7 +1,7 @@
 <?php
 namespace Marketplace;
 
-class Connection extends \Exception { }
+class WrongFileException extends \Exception { }
 
 class Connection
 {
