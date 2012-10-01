@@ -42,6 +42,23 @@ class ClientTest extends PHPUnit_Framework_TestCase
             $url);
     }
 
+    public function testValidateManifest()
+    {
+        $response_body = '{'
+            .'"id": "abcdefghijklmnopqrstuvwxyz123456", '
+            .'"processed": true, '
+            .'"resource_uri": "/api/apps/validation/abcdefghijklmnopqrstuvwxyz123456/", '
+            .'"valid": true, '
+            .'"validation": ""}';
+        $stub = $this->getCurlMockFetchReturn(
+            array('status_code' => 201, 'body' => $response_body));
+        $marketplace = new Marketplace\Client($stub);
+        $response = $marketplace->validateManifest('http://example.com/');
+        $this->assertTrue($response['success']);
+        $this->assertTrue($response['valid']);
+        $this->assertEquals($response['id'], 'abcdefghijklmnopqrstuvwxyz123456');
+    }
+
     public function testCreateApp()
     {
         $response_body = '{'
@@ -63,7 +80,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
             .'"support_url": null}';
         $stub = $this->getCurlMockFetchReturn(
             array('status_code' => 201, 'body' => $response_body));
-        $marketplace = new Marketplace\Client($stub, 'key', 'secret', 'domain', 'http', 443, '');
+        $marketplace = new Marketplace\Client($stub);
         $response = $marketplace->createWebapp("abcdefghijklmnopqrstuvwxyz123456");
         $this->assertEquals($response['success'], true);
         $this->assertEquals($response['id'], '123456');

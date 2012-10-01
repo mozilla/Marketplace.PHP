@@ -42,11 +42,11 @@ class Connection
                 CURLOPT_POSTFIELDS => $body));
         }
         $response = curl_exec($ch);
-        $this->info = curl_getinfo($ch);
+        $info = curl_getinfo($ch);
         curl_close($ch);
         if (!$response) return false;
         return array(
-            'status_code' => $this->info['http_code'],
+            'status_code' => $info['http_code'],
             'body' => $response);
     }
 

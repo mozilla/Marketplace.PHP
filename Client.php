@@ -77,6 +77,65 @@ class Client
         return $url;
     }
 
+
+    
+    /**
+     * Marketplace is downloading the manifest from given location and
+     * validates it.
+     *
+     * @param  string  $manifest_url
+     * @return array   success (bool)
+     *                 id (string)
+     *                 resource_uri (string)
+     */
+    public function validateManifest($manifest_url)
+    {
+        $url = $this->getUrl('validate');
+        $data = array('manifest' => $manifest_url);
+        // the expected status_code is 201 as Marketplace is creating
+        // a manifest item in the database
+        $response = $this->connection->fetchJSON('POST', $url, $data, 201);
+        $data = $response['json'];
+        $ret = array(
+            'success' => true,
+            'valid' => $data->valid,
+            'id' => $data->id,
+            'resource_uri' => $data->resource_uri);
+        // extract validation errors if manifest not valid
+        if ($data->valid === false) {
+            $errors = array();
+            foreach ($data->validation->messages as $msg) {
+                if ($msg->type === 'error') {
+                    $errors[] = $msg->message;
+                }
+            }
+            $ret['errors'] = $errors;
+        }
+        return $ret;
+    }
+
+    /**
+     * Check if manifest issued for validation is valid. However validate
+     * manifest is currently working synchronously, and is giving
+     * the validation message in the response, it might change to
+     * asynchronus as it used to be before. This function will then
+     * become necessary.
+     *
+     * @param   integer  $manifest_id
+     * @return  array    processed (bool)
+     *                   valid (bool)
+     */
+    public function isManifestValid($manifest_id)
+    {
+        $url = $this->getUrl('validation_result', array('id' => $manifest_id));
+        $response = $this->connection->fetchJSON('GET', $url, NULL, 200);
+        $data = $response['json'];
+        return array(
+            'success' => true,
+            'valid' => $data->valid,
+            'processed' => $data->processed);
+    }
+
     /**
      * extract webapp information from data provided in the response
      * body
