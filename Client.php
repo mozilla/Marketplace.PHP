@@ -1,119 +1,50 @@
-<?php 
-/**
- * A class to interact with Mozilla Marketplace API
- *
- * TODO: discuss additional features
-   * get user's app list (this might be done by search)
-   * order manifest revalidation
-   * order webapp download
- *
- * For full spec please read Marketplace API documentation
- * https://github.com/mozilla/zamboni/blob/master/docs/topics/api.rst
- */
+<?php
+namespace Marketplace;
 
-require_once 'curl.php';
+class WrongFileException extends \Exception { }
 
-class Marketplace {
+class Client {
 
-    private $token;
-    private $oauth;
-    private $urls = array(
-        'validate' => '/apps/validation/',
-        'validation_result' => '/apps/validation/{id}/',
-        'create' => '/apps/app/',
-        'app' => '/apps/app/{id}/',
-        'create_screenshot' => '/apps/preview/?app={id}',
-        'screenshot' => '/apps/preview/{id}/',
-        'categories' => '/apps/category/?limit={limit}&offset={offset}'); 
+    private $connection;
+    public 
+        $domain, 
+        $protocol, 
+        $port, 
+        $prefix,
+        $urls = array(
+            'validate' => '/apps/validation/',
+            'validation_result' => '/apps/validation/{id}/',
+            'create' => '/apps/app/',
+            'app' => '/apps/app/{id}/',
+            'create_screenshot' => '/apps/preview/?app={id}',
+            'screenshot' => '/apps/preview/{id}/',
+            'categories' => '/apps/category/?limit={limit}&offset={offset}'); 
+
     /**
-     * Connect to the Marketplace and get the token
+     * assign Marketplace/Connection class
      *
-     * @param    string        $domain
-     * @param    string        $protocol
+     * @param    Connection     $connection
+     * @param    string         $domain
+     * @param    string         $protocol
      * @param    integer        $port
-     * @param    string        $prefix        a prefix to add before url path
-     * @param    string        $consumer_key
-     * @param    string        $consumer_secret
+     * @param    string         $prefix        a prefix to add before url path
+     * @param    string         $consumer_key
+     * @param    string         $consumer_secret
      */
     function __construct(
-        $consumer_key, 
-        $consumer_secret,
+        $connection,
         $domain='marketplace.mozilla.org', 
         $protocol='https', 
         $port=443, 
-        $prefix='',
-        $curl=NULL) 
+        $prefix='') 
     {
+        $this->connection = $connection;
         $this->domain = $domain;
         $this->protocol = $protocol;
         $this->port = $port;
         $this->prefix = $prefix;
-        // prepare oAuth to get the authentication header
-        $this->oauth = new OAuth($consumer_key, $consumer_secret,
-            OAUTH_SIG_METHOD_HMACSHA1);
-        // adding a stub to the system
-        $this->curl = $curl;
     }
-
-    /**
-     * extract the reason from HTTP response
-     */ 
-    private static function _getErrorReason($response) 
-    {
-        try {
-            // if tastypie gives a reason for error - return it
-            $body = json_decode($response['body']);
-            $reason = $body->reason;
-        } catch (Exception $e) {
-            $reason = $response['body'];
-        }
-        return $reason;
-    }
-    /**
-     * Fetch data from the JSON API
-     * 
-     * @param    string        $method      uppercase REST method name 
-     *                                      (POST,GET,DELETE,UPDATE)
-     * @param    string        $url    
-     * @param    array        $data         data to send to the API, it's gonna
-     *                                      be JSON encoded
-     * @param    int         $expected_status_code
-     * @return  mixed        response from the API
-     */
-    private function fetch($method, $url, $data=NULL, $expected_status_code=NULL) 
-    {
-        if ($data) {
-            $body = json_encode($data);
-        } else {
-            $body = '';
-        }
-        // TODO: consider not using the OAuth lib as it's used for
-        //       getting the header only
-        $OA_header = $this->oauth->getRequestHeader($method, $url);
-        $headers = array(
-            "Content-Type: application/json", 
-            "Authorization: $OA_header",
-            "Accept: application/json");
-
-        // if stub provided - use it instead of Curl class new instance
-        if ($this->curl) {
-            $curl = $this->curl;
-        } else {
-            $curl = new Curl($url, $method, $headers, $body);
-        }
-        // fetch the response from API
-        $response = $curl->fetch();
-        // throw on 40x, 50x errors and unexpected status_code
-        if ($response['status_code'] >= 400 
-            OR $expected_status_code 
-                AND $response['status_code'] != $expected_status_code) {
-            $reason = $this::_getErrorReason($response);
-            // XXX: find if better exception needed
-            throw new Exception($reason, $response['status_code']);
-        }
-        return $response;
-    }
-
+    
     /**
      * Creates a full URL to the API using urls dict and simple 
      * replacement mechanism
@@ -137,63 +68,6 @@ class Marketplace {
                 $url);
         }
         return $url;
-    }
-
-    /**
-     * Marketplace is downloading the manifest from given location and
-     * validates it.
-     *
-     * @param    string         $manifest_url
-     * @return   array          success (bool)
-     *                          id (string)
-     *                          resource_uri (string)
-     */
-    public function validateManifest($manifest_url) 
-    {
-        $url = $this->getUrl('validate');
-        $data = array('manifest' => $manifest_url);
-        // the expected status_code is 201 as Marketplace is creating
-        // a manifest item in the database
-        $response = $this->fetch('POST', $url, $data, 201);
-        $data = json_decode($response['body']);
-        $ret = array(
-            'success' => true,
-            'valid' => $data->valid,
-            'id' => $data->id,
-            'resource_uri' => $data->resource_uri);
-        // extract validation errors if manifest not valid
-        if ($data->valid === false) {
-            $errors = array();
-            foreach ($data->validation->messages as $msg) {
-                if ($msg->type === 'error') {
-                    $errors[] = $msg->message;
-                }
-            }
-            $ret['errors'] = $errors;
-        }
-        return $ret;
-    }
-
-    /**
-     * Check if manifest issued for validation is valid. However validate 
-     * manifest is currently working synchronously, and is giving 
-     * the validation message in the response, it might change to 
-     * asynchronus as it used to be before. This function will then
-     * become necessary.
-     *
-     * @param    integer        $manifest_id
-     * @return   array          processed (bool)
-     *                          valid (bool)
-     */
-    public function isManifestValid($manifest_id) 
-    {
-        $url = $this->getUrl('validation_result', array('id' => $manifest_id));
-        $response = $this->fetch('GET', $url, NULL, 200);
-        $data = json_decode($response['body']);
-        return array(
-            'success' => true, 
-            'valid' => $data->valid,
-            'processed' => $data->processed);
     }
 
     /**
@@ -238,10 +112,9 @@ class Marketplace {
     public function createWebapp($manifest_id) 
     {
         $url = $this->getUrl('create');
-        $response = $this->fetch('POST', $url, array('manifest' => $manifest_id), 201);
-        $data = json_decode($response['body']);
+        $response = $this->connection->fetchJSON('POST', $url, array('manifest' => $manifest_id), 201);
         $ret = array('success' => true);
-        return array_merge($ret, $this::_getInfoFromData($data));
+        return array_merge($ret, $this::_getInfoFromData($response['json']));
     }
 
     /**
@@ -269,12 +142,12 @@ class Marketplace {
             'support_email', 'device_types', 'payment_type');
         $diff = array_diff($required, array_keys($data));
         if ($diff) {
-            throw new InvalidArgumentException(
+            throw new \InvalidArgumentException(
                 'Following keys are required: '. implode(', ', $diff));
         }
         // PUT data
         $url = $this->getUrl('app', array('id' => $webapp_id));
-        $response = $this->fetch('PUT', $url, $data, 202);
+        $response = $this->connection->fetch('PUT', $url, $data, 202);
         return array('success' => true);
     }
 
@@ -288,12 +161,10 @@ class Marketplace {
     public function getWebappInfo($webapp_id) 
     {
         $url = $this->getUrl('app', array('id' => $webapp_id));
-        $response = $this->fetch('GET', $url, NULL, 200);
-        $data = json_decode($response['body']);
-        $ret = ;
+        $response = $this->connection->fetchJSON('GET', $url, NULL, 200);
         return array_merge(
             array('success' => true), 
-            $this::_getInfoFromData($data));
+            $this::_getInfoFromData($response['json']));
     }
 
     /**
@@ -306,7 +177,7 @@ class Marketplace {
      */
     public function removeWebapp($webapp_id) 
     {
-        throw new Exception("Not Implemented");
+        throw new \Exception("Not Implemented");
     }
 
     /**
@@ -346,7 +217,7 @@ class Marketplace {
 
         if (!$imginfo) {
             // XXX: here determine the video miemetype before throwing
-            throw new Exception("Wrong file");
+            throw new WrongFileException("Wrong file");
         }
         
         $url = $this->getUrl('create_screenshot', array('id' => $webapp_id));
@@ -356,11 +227,10 @@ class Marketplace {
                 'type' => $imginfo['mime'],
                 'data' => $content_encoded));
 
-        $response = $this->fetch('POST', $url, $data, 201);
-        $body = json_decode($response['body']);
+        $response = $this->connection->fetchJSON('POST', $url, $data, 201);
         return array_merge(
             array('success' => true), 
-            $this::_getScreeshotInfoFromData($body));
+            $this::_getScreeshotInfoFromData($response['json']));
     }
 
     /**
@@ -373,11 +243,10 @@ class Marketplace {
     public function getScreenshotInfo($screenshot_id) 
     {
         $url = $this->getUrl('screenshot', array('id' => $screenshot_id));
-        $response = $this->fetch('GET', $url, NULL, 200);
-        $body = json_decode($response['body']);
+        $response = $this->connection->fetchJSON('GET', $url, NULL, 200);
         return array_merge(
             array('success' => true), 
-            $this->_getScreeshotInfoFromData($body));
+            $this->_getScreeshotInfoFromData($response['json']));
     }
 
     /**
@@ -391,8 +260,7 @@ class Marketplace {
     public function deleteScreenshot($screenshot_id) 
     {
         $url = $this->getUrl('screenshot', array('id' => $screenshot_id));
-        $response = $this->fetch('DELETE', $url, NULL, 204);
-        $body = json_decode($response['body']);
+        $response = $this->connection->fetch('DELETE', $url, NULL, 204);
         return array('success' => true);
     }
 
@@ -407,8 +275,8 @@ class Marketplace {
     {
         $url = $this->getUrl('categories', array('limit' => $limit, 
                                                   'offset' => $offset));
-        $response = $this->fetch('GET', $url, NULL, 200);
-        $body = json_decode($response['body']);
+        $response = $this->connection->fetchJSON('GET', $url, NULL, 200);
+        $body = $response['json'];
         $ret = array(
             'success' => true,
             'pager' => array(
