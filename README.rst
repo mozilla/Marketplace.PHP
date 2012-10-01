@@ -9,15 +9,19 @@ Allows to validate, create and manipulate webapps and screenshots
 Usage
 #####
 
+To Test::
+
+    phpunit Tests
+
 Obtain your key and secret from http://marketplace.mozilla.org/developers/api
 
-Load library::
+Instantiate Connection object::
 
-    require_once('classes/marketplace.php');
+    $connection = new Marketplace\Connection('yourkey', 'yoursecret');
 
-Instantiate Marketplace object::
+Pass it to the Client::
 
-    $marketplace = new Marketplace('yourkey', 'yoursecret');
+    $marketplace = Marketplace\Client($connection);
 
 Create webapp if manifest valid::
 
@@ -33,5 +37,3 @@ Create webapp if manifest valid::
     } else {
       echo "invalid";
     }
-
-
