@@ -155,7 +155,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException           Exception
+     * @expectedException           Marketplace\WrongFileException
      * @expectedExceptionMessage    Wrong file
      */
     public function testUploadWrongFile() 

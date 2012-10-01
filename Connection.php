@@ -1,6 +1,8 @@
 <?php
 namespace Marketplace;
 
+class FetchException extends \Exception { }
+
 class Connection {
 
     private $oauth;
@@ -94,7 +96,7 @@ class Connection {
                 AND $response['status_code'] != $expected_status_code) {
             $reason = $this::_getErrorReason($response);
             // XXX: find if better exception needed
-            throw new \Exception($reason, $response['status_code']);
+            throw new FetchException($reason, $response['status_code']);
         }
         return $response;
     }

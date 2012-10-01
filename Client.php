@@ -1,6 +1,8 @@
 <?php
 namespace Marketplace;
 
+class WrongFileException extends \Exception { }
+
 class Client {
 
     private $connection;
@@ -215,7 +217,7 @@ class Client {
 
         if (!$imginfo) {
             // XXX: here determine the video miemetype before throwing
-            throw new \Exception("Wrong file");
+            throw new WrongFileException("Wrong file");
         }
         
         $url = $this->getUrl('create_screenshot', array('id' => $webapp_id));

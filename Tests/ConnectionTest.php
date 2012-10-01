@@ -25,7 +25,7 @@ class MarketplaceTest extends PHPUnit_Framework_TestCase
      * On every Http status code >= 400 Marketplace::fetch is throwing 
      * an exception
      *
-     * @expectedException       Exception
+     * @expectedException       Marketplace\FetchException
      * @expectedExceptionCode   401
      */
     public function testUnauthorizedAccess()
@@ -39,7 +39,7 @@ class MarketplaceTest extends PHPUnit_Framework_TestCase
     /**
      * fetch throws on unexpected status_code
      *
-     * @expectedException           Exception
+     * @expectedException           Marketplace\FetchException
      * @expectedExceptionCode       204
      * @expectedExceptionMessage    Test
      */
@@ -54,7 +54,7 @@ class MarketplaceTest extends PHPUnit_Framework_TestCase
     /**
      * API might response with a non JSON body
      *
-     * @expectedException           Exception
+     * @expectedException           Marketplace\FetchException
      * @expectedExceptionCode       404
      * @expectedExceptionMessage    <html><title>404</title><body>404</body></html>
      */
