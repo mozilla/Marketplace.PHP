@@ -20,6 +20,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
         $stub->expects($this->any())
                  ->method('fetch')
                  ->will($this->returnValue($return_value));
+
         return $stub;
     }
     public function testGetUrls()
@@ -37,7 +38,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
         $url = $get_url->invokeArgs($client,
             array('categories', array( 'limit' => 20, 'offset' => 1)));
         $this->assertEquals(
-            'http://domain:80/prefix/api/apps/category/?limit=20&offset=1', 
+            'http://domain:80/prefix/api/apps/category/?limit=20&offset=1',
             $url);
     }
 
@@ -72,14 +73,14 @@ class ClientTest extends PHPUnit_Framework_TestCase
     /**
      * @expectedException           InvalidArgumentException
      * @expectedExceptionMessage    Following keys are required: summary, categories, privacy_policy, support_email, device_types, payment_type
-     */ 
-    public function testFailedValidationUpdateWebapp() 
+     */
+    public function testFailedValidationUpdateWebapp()
     {
         $client = new Marketplace\Client(NULL);
         $client->updateWebapp(123456, array('name' => 'TestName'));
     }
 
-    public function testUpdateWebapp() 
+    public function testUpdateWebapp()
     {
         $stub = $this->getCurlMockFetchReturn(array('status_code' => 202, 'body' => ''));
         $client = new Marketplace\Client($stub, 'domain', 'http', 443, '');
@@ -88,14 +89,14 @@ class ClientTest extends PHPUnit_Framework_TestCase
             'summary' => '',        // not empty string required for real connection
             'categories' => '',     // array required for real connection
             'privacy_policy' => '', // not empty string required
-            'support_email' => '',  // valid email required 
+            'support_email' => '',  // valid email required
             'device_types' => '',   // array required
             'payment_type' => '',   // not empty string required
         ));
         $this->assertTrue($response['success']);
     }
 
-    public function testGetInfo() 
+    public function testGetInfo()
     {
         $response_body = '{'
             .'"categories": [], '
@@ -126,13 +127,13 @@ class ClientTest extends PHPUnit_Framework_TestCase
      * @expectedException           Exception
      * #expectedExceptionMessage    Not Implemented
      */
-    public function testRemoveWebappNotImplemented() 
+    public function testRemoveWebappNotImplemented()
     {
         $marketplace = new Marketplace\Client(NULL);
         $marketplace->removeWebapp(123);
     }
 
-    public function testUploadScreenshot() 
+    public function testUploadScreenshot()
     {
         $response_body = '{'
             .'"filetype": "image/png", '
@@ -158,7 +159,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
      * @expectedException           Marketplace\WrongFileException
      * @expectedExceptionMessage    Wrong file
      */
-    public function testUploadWrongFile() 
+    public function testUploadWrongFile()
     {
         $img = "Tests/ClientTest.php";
         $handle = fopen($img, 'r');
@@ -167,7 +168,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
         fclose($handle);
     }
 
-    public function testGetScreenshotInfo() 
+    public function testGetScreenshotInfo()
     {
         $response_body = '{'
             .'"filetype": "image/png", '
@@ -184,7 +185,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($result['id'], 12345);
     }
 
-    public function testDeleteScreenshot() 
+    public function testDeleteScreenshot()
     {
         $stub = $this->getCurlMockFetchReturn(array('status_code' => 204, 'body' => ''));
         $client = new Marketplace\Client($stub, 'domain', 'http', 443, '');
@@ -192,7 +193,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($response['success'], true);
     }
 
-    public function testGetCategories() 
+    public function testGetCategories()
     {
         $response_body = '{'
             .'"meta": {'
@@ -200,7 +201,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
                 .'"next": null, '
                 .'"offset": 0, '
                 .'"previous": null, '
-                .'"total_count": 6}, ' 
+                .'"total_count": 6}, '
             .'"objects": ['
                 .'{"id": "154", '
                     .'"name": "Business", '

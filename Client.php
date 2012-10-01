@@ -1,15 +1,15 @@
 <?php
 namespace Marketplace;
 
-class WrongFileException extends \Exception { }
+class Client extends \Exception { }
 
-class Client {
-
+class Client
+{
     private $connection;
-    public 
-        $domain, 
-        $protocol, 
-        $port, 
+    public
+        $domain,
+        $protocol,
+        $port,
         $prefix,
         $urls = array(
             'validate' => '/apps/validation/',
@@ -18,25 +18,25 @@ class Client {
             'app' => '/apps/app/{id}/',
             'create_screenshot' => '/apps/preview/?app={id}',
             'screenshot' => '/apps/preview/{id}/',
-            'categories' => '/apps/category/?limit={limit}&offset={offset}'); 
+            'categories' => '/apps/category/?limit={limit}&offset={offset}');
 
     /**
      * assign Marketplace/Connection class
      *
-     * @param    Connection     $connection
-     * @param    string         $domain
-     * @param    string         $protocol
-     * @param    integer        $port
-     * @param    string         $prefix        a prefix to add before url path
-     * @param    string         $consumer_key
-     * @param    string         $consumer_secret
+     * @param Connection $connection
+     * @param string     $domain
+     * @param string     $protocol
+     * @param integer    $port
+     * @param string     $prefix          a prefix to add before url path
+     * @param string     $consumer_key
+     * @param string     $consumer_secret
      */
-    function __construct(
+    public function __construct(
         $connection,
-        $domain='marketplace.mozilla.org', 
-        $protocol='https', 
-        $port=443, 
-        $prefix='') 
+        $domain='marketplace.mozilla.org',
+        $protocol='https',
+        $port=443,
+        $prefix='')
     {
         $this->connection = $connection;
         $this->domain = $domain;
@@ -44,40 +44,41 @@ class Client {
         $this->port = $port;
         $this->prefix = $prefix;
     }
-    
+
     /**
-     * Creates a full URL to the API using urls dict and simple 
+     * Creates a full URL to the API using urls dict and simple
      * replacement mechanism
      *
-     * @param   string      $key
-     * @param   array       $replace    replace key with value
+     * @param string $key
+     * @param array  $replace replace key with value
      */
-    private function getUrl($key, $replace=array()) 
+    private function getUrl($key, $replace=array())
     {
         $url = $this->protocol.'://'.$this->domain.':'.$this->port
             .$this->prefix.'/api'.$this->urls[$key];
         if ($replace) {
             $rep = array();
             // add curly brackets to the keys
-            foreach($replace as $key => $value) {
+            foreach ($replace as $key => $value) {
                 $rep['{'.$key.'}'] = $value;
             }
             $url = str_replace(
-                array_keys($rep), 
-                array_values($rep), 
+                array_keys($rep),
+                array_values($rep),
                 $url);
         }
+
         return $url;
     }
 
     /**
-     * extract webapp information from data provided in the response 
+     * extract webapp information from data provided in the response
      * body
      *
-     * @param       stdClass    $data
+     * @param stdClass $data
      * #return      array
      */
-    private static function _getInfoFromData($data) 
+    private static function _getInfoFromData($data)
     {
         return array(
             'id' => $data->id,
@@ -97,45 +98,46 @@ class Client {
             'support_url' => $data->support_url);
     }
 
-    /** 
-     * Order webapp creation. Marketplace will download the webapp info from 
+    /**
+     * Order webapp creation. Marketplace will download the webapp info from
      * location provided in the manifest.
      *
-     * @param    integer        $manifest_id
-     * @return    array         success (bool)
-     *                          id (string)                webapp id
-     *                          resource_uri (string)    
-     *                          slug (string)            unique name
-     *                          ... other fields provided by 
+     * @param  integer $manifest_id
+     * @return array   success (bool)
+     *                          id (string) webapp id
+     *                          resource_uri (string)
+     *                          slug (string) unique name
+     *                          ... other fields provided by
      *                          _getInfoFromData
      */
-    public function createWebapp($manifest_id) 
+    public function createWebapp($manifest_id)
     {
         $url = $this->getUrl('create');
         $response = $this->connection->fetchJSON('POST', $url, array('manifest' => $manifest_id), 201);
         $ret = array('success' => true);
+
         return array_merge($ret, $this::_getInfoFromData($response['json']));
     }
 
     /**
      * Update webapp
      *
-     * @param    string        $webapp_id
-     * @param    array         $data some keys are required:
+     * @param string $webapp_id
+     * @param array  $data      some keys are required:
      *                             name          title of the webapp (max 127 char)
      *                             summary       (max 255 char)
      *                             categories    a list of webapp category ids
      *                                           at least 2 are required, use
      *                                           getCategoryList for ids
-     *                             support_email    
+     *                             support_email
      *                             device_types  a list of the device types
      *                                           at least on of 'desktop', 'phone',
      *                                           'tablet'
      *                             payment_type  'free'
-     * @return    array        success (bool)
+     * @return array success (bool)
      *                         message (string)
      */
-    public function updateWebapp($webapp_id, $data) 
+    public function updateWebapp($webapp_id, $data)
     {
         // validate if all keys are in place
         $required = array('name', 'summary', 'categories', 'privacy_policy',
@@ -148,22 +150,24 @@ class Client {
         // PUT data
         $url = $this->getUrl('app', array('id' => $webapp_id));
         $response = $this->connection->fetch('PUT', $url, $data, 202);
+
         return array('success' => true);
     }
 
     /**
      * Get details of a webapp
      *
-     * @param    string        $webapp_id
-     * @return    array        success
+     * @param  string $webapp_id
+     * @return array  success
      *                        other fields defining a webapp
      */
-    public function getWebappInfo($webapp_id) 
+    public function getWebappInfo($webapp_id)
     {
         $url = $this->getUrl('app', array('id' => $webapp_id));
         $response = $this->connection->fetchJSON('GET', $url, NULL, 200);
+
         return array_merge(
-            array('success' => true), 
+            array('success' => true),
             $this::_getInfoFromData($response['json']));
     }
 
@@ -171,23 +175,23 @@ class Client {
      * Remove webapp from Marketplace
      * Not implemented yet
      *
-     * @param    string        $webapp_id
-     * @return    array        success (bool)
+     * @param  string $webapp_id
+     * @return array  success (bool)
      *                        message (string)
      */
-    public function removeWebapp($webapp_id) 
+    public function removeWebapp($webapp_id)
     {
         throw new \Exception("Not Implemented");
     }
 
     /**
-     * extract screenshot information from data provided in the response 
+     * extract screenshot information from data provided in the response
      * body
      *
-     * @param       stdClass    $data
+     * @param stdClass $data
      * #return      array
      */
-    private static function _getScreeshotInfoFromData($data) 
+    private static function _getScreeshotInfoFromData($data)
     {
         return array(
             'id' => $data->id,
@@ -202,12 +206,12 @@ class Client {
      *
      * TODO: add ability to send videos
      *
-     * @param    string     $webapp_id
-     * @param    resource   $handle     A file system pointer resource that 
+     * @param string   $webapp_id
+     * @param resource $handle    A file system pointer resource that
      *                                  is typically created using fopen().
-     * @param    integer    $position   on which position place the image
+     * @param integer $position on which position place the image
      */
-    public function addScreenshot($webapp_id, $handle, $position = 1) 
+    public function addScreenshot($webapp_id, $handle, $position = 1)
     {
         // handle doesn't have to be a filesystem file.
         $content = stream_get_contents($handle);
@@ -219,7 +223,7 @@ class Client {
             // XXX: here determine the video miemetype before throwing
             throw new WrongFileException("Wrong file");
         }
-        
+
         $url = $this->getUrl('create_screenshot', array('id' => $webapp_id));
         $data = array(
             'position' => $position,
@@ -228,24 +232,26 @@ class Client {
                 'data' => $content_encoded));
 
         $response = $this->connection->fetchJSON('POST', $url, $data, 201);
+
         return array_merge(
-            array('success' => true), 
+            array('success' => true),
             $this::_getScreeshotInfoFromData($response['json']));
     }
 
     /**
      * Get info about screenshot or video
      *
-     * @param    string    $screenshot_id
-     * @return    array    success (bool)
+     * @param  string $screenshot_id
+     * @return array  success (bool)
      *                    other fields defining a screenshot
      */
-    public function getScreenshotInfo($screenshot_id) 
+    public function getScreenshotInfo($screenshot_id)
     {
         $url = $this->getUrl('screenshot', array('id' => $screenshot_id));
         $response = $this->connection->fetchJSON('GET', $url, NULL, 200);
+
         return array_merge(
-            array('success' => true), 
+            array('success' => true),
             $this->_getScreeshotInfoFromData($response['json']));
     }
 
@@ -253,27 +259,28 @@ class Client {
      * Remove screenshot from Marketplace
      * TODO: FIX IT! find the reason why it's not working on -dev
      *
-     * @param    string    $screenshot_id
-     * @return    array        success (bool)
+     * @param  string $screenshot_id
+     * @return array  success (bool)
      *                        message (string)
      */
-    public function deleteScreenshot($screenshot_id) 
+    public function deleteScreenshot($screenshot_id)
     {
         $url = $this->getUrl('screenshot', array('id' => $screenshot_id));
         $response = $this->connection->fetch('DELETE', $url, NULL, 204);
+
         return array('success' => true);
     }
 
     /**
      * Get list of available categories
      *
-     * @param       int         $limit
-     * @param       int         $offset   
-     * @return      array       categories with the ids
+     * @param  int   $limit
+     * @param  int   $offset
+     * @return array categories with the ids
      */
-    public function getCategoryList($limit=20, $offset=0) 
+    public function getCategoryList($limit=20, $offset=0)
     {
-        $url = $this->getUrl('categories', array('limit' => $limit, 
+        $url = $this->getUrl('categories', array('limit' => $limit,
                                                   'offset' => $offset));
         $response = $this->connection->fetchJSON('GET', $url, NULL, 200);
         $body = $response['json'];
@@ -292,6 +299,7 @@ class Client {
                 'resource_uri' => $cat->resource_uri,
                 'name' => $cat->name);
         }
+
         return $ret;
     }
 }

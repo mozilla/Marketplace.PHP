@@ -2,13 +2,12 @@
 require_once 'PHPUnit/Autoload.php';
 require_once 'Connection.php';
 
-
 class MarketplaceTest extends PHPUnit_Framework_TestCase
 {
     /**
      * Get stub with _fetch method modified
      */
-    private function _getConnectionStub($return_data) 
+    private function _getConnectionStub($return_data)
     {
         $stub = $this->getMockBuilder('Marketplace\Connection')
             ->setConstructorArgs(array('key', 'secret'))
@@ -18,11 +17,12 @@ class MarketplaceTest extends PHPUnit_Framework_TestCase
                  ->method('curl')
                  ->will($this->returnValue($return_data));
         $this->assertEquals($stub::curl('a', 'b', 'c'), $return_data);
+
         return $stub;
     }
 
     /**
-     * On every Http status code >= 400 Marketplace::fetch is throwing 
+     * On every Http status code >= 400 Marketplace::fetch is throwing
      * an exception
      *
      * @expectedException       Marketplace\FetchException
