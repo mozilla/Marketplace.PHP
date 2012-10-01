@@ -4,14 +4,19 @@ namespace Marketplace;
 class Client {
 
     private $connection;
-    public $urls = array(
-        'validate' => '/apps/validation/',
-        'validation_result' => '/apps/validation/{id}/',
-        'create' => '/apps/app/',
-        'app' => '/apps/app/{id}/',
-        'create_screenshot' => '/apps/preview/?app={id}',
-        'screenshot' => '/apps/preview/{id}/',
-        'categories' => '/apps/category/?limit={limit}&offset={offset}'); 
+    public 
+        $domain, 
+        $protocol, 
+        $port, 
+        $prefix,
+        $urls = array(
+            'validate' => '/apps/validation/',
+            'validation_result' => '/apps/validation/{id}/',
+            'create' => '/apps/app/',
+            'app' => '/apps/app/{id}/',
+            'create_screenshot' => '/apps/preview/?app={id}',
+            'screenshot' => '/apps/preview/{id}/',
+            'categories' => '/apps/category/?limit={limit}&offset={offset}'); 
 
     /**
      * assign Marketplace/Connection class
