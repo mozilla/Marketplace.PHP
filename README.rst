@@ -37,3 +37,9 @@ Create webapp if manifest valid::
     } else {
       echo "invalid";
     }
+
+Requires
+########
+
+OAuth class (PECL)
+curl

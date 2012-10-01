@@ -3,6 +3,12 @@ namespace Marketplace;
 
 class FetchException extends \Exception { }
 
+/**
+* A class to interact with Mozilla Marketplace API
+*
+* For API full spec please read Marketplace API documentation
+* https://github.com/mozilla/zamboni/blob/master/docs/topics/api.rst
+*/
 class Client
 {
     private $connection;
