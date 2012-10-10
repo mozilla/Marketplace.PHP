@@ -1,7 +1,8 @@
 Marketplace PHP client
 ======================
 
-A library to interact with [Marketplace](http://marketplace.mozilla.org)
+A library to interact with Marketplace_
+
 
 Allows to validate, create and manipulate webapps and screenshots
 
@@ -43,3 +44,5 @@ Requires
 
 OAuth class (PECL)
 curl
+
+.. _Marketplace: http://marketplace.mozilla.org
