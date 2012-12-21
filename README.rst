@@ -22,7 +22,7 @@ Instantiate Connection object::
 
 Pass it to the Client::
 
-    $marketplace = Marketplace\Client($connection);
+    $marketplace = new Marketplace\Client($connection);
 
 Create webapp if manifest valid::
 
