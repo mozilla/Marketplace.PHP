@@ -1,8 +1,6 @@
 <?php
 namespace Marketplace;
 
-class WrongFileException extends \Exception { }
-
 /**
  * Set headers and return results from Marketplace oAuth API
  */

@@ -12,6 +12,8 @@
         "bin-dir": "bin"
     },
     "autoload": {
-        "files": ["Client.php", "Connection.php"]
+        "psr-0": {
+            "Marketplace": "src"
+        }
     }
 }
