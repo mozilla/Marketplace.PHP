@@ -12,7 +12,9 @@ Usage
 
 To Test::
 
-    phpunit Tests
+    curl -sS https://getcomposer.org/installer | php
+    ./composer.phar install --dev
+    ./bin/phpunit -c phpunit.xml-dist
 
 Obtain your key and secret from http://marketplace.mozilla.org/developers/api
 
@@ -38,11 +40,5 @@ Create webapp if manifest valid::
     } else {
       echo "invalid";
     }
-
-Requires
-########
-
-OAuth class (PECL)
-curl
 
 .. _Marketplace: http://marketplace.mozilla.org
