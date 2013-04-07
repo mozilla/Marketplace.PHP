@@ -1,8 +1,6 @@
 <?php
 namespace Marketplace;
 
-class FetchException extends \Exception { }
-
 /**
 * A class to interact with Mozilla Marketplace API
 *
@@ -78,7 +76,7 @@ class Client
     }
 
 
-    
+
     /**
      * Marketplace is downloading the manifest from given location and
      * validates it.
