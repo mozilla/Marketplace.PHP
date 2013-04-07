@@ -1,7 +1,4 @@
 <?php
-require_once 'PHPUnit/Autoload.php';
-require_once 'Connection.php';
-require_once 'Client.php';
 
 // Note: valid manifest url:
 // http://mozilla.github.com/MarketplaceClientExample/manifest.webapp
