@@ -1,0 +1,16 @@
+{
+    "name": "mozilla/marketplace",
+    "description": "Marketplace PHP client",
+    "require": {
+        "ext-oauth": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    },
+    "config": {
+        "bin-dir": "bin"
+    },
+    "autoload": {
+        "files": ["Client.php", "Connection.php"]
+    }
+}
