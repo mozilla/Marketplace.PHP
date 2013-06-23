@@ -14,7 +14,7 @@ To Test::
 
     phpunit Tests
 
-Obtain your key and secret from http://marketplace.mozilla.org/developers/api
+Obtain your key and secret from http://marketplace.firefox.com/developers/api
 
 Instantiate Connection object::
 
@@ -45,4 +45,4 @@ Requires
 OAuth class (PECL)
 curl
 
-.. _Marketplace: http://marketplace.mozilla.org
+.. _Marketplace: http://marketplace.firefox.com
