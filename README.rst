@@ -19,10 +19,12 @@ To Test::
 Obtain your key and secret from http://marketplace.mozilla.org/developers/api
 
 Instantiate a target object::
+
     $target = new Target;
     //update the Target URL if necessary with $target->setUrl($url)
 
 Instantiate a credential object::
+
     $credential = new Credential;
     $credential->setConsumerKey(123);
     $credential->setConsumerSecret(456);
