@@ -12,28 +12,37 @@ Usage
 
 To Test::
 
-    phpunit Tests
+    composer install --dev
+
+    ./vendor/bin/phpunir
 
 Obtain your key and secret from http://marketplace.mozilla.org/developers/api
 
-Instantiate Connection object::
+Instantiate a target object::
+    $target = new Target;
+    //update the Target URL if necessary with $target->setUrl($url)
 
-    $connection = new Marketplace\Connection('yourkey', 'yoursecret');
+Instantiate a credential object::
+    $credential = new Credential;
+    $credential->setConsumerKey(123);
+    $credential->setConsumerSecret(456);
 
 Pass it to the Client::
 
-    $marketplace = new Marketplace\Client($connection);
+    $client = new Mozilla\Marketplace\Client;
+    $client->setTarget($target);
+    $client->setCredential($credential);
 
 Create webapp if manifest valid::
 
     // validate manifest
-    $response = $marketplace->validateManifest('http://example.com/manifest.webapp');
+    $response = $client->validateManifest('http://example.com/manifest.webapp');
     echo "\n\nManifest id: ".$response['id'];
     echo "\nManifest is ";
     if ($response["valid"]) {
       echo "valid - creating webapp...";
       // create webapp
-      $response = $marketplace->createWebapp($response['id']);
+      $response = $client->createWebapp($response['id']);
       echo "\n\nWebapp id: ".$response['id'];
     } else {
       echo "invalid";
@@ -42,7 +51,14 @@ Create webapp if manifest valid::
 Requires
 ########
 
-OAuth class (PECL)
-curl
+composer
+
+Changelog
+########
+
+ - Each Object has it own responsibility
+ - Each Object can be easily injected in frameworks like SF2 and ZF2
+ - Guzzle keeps control of OAuth
+ - 100% Coverage
 
 .. _Marketplace: http://marketplace.mozilla.org
