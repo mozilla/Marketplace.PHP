@@ -1,5 +1,5 @@
 {
-    "name": "Mozilla/Marketplace",
+    "name": "mozilla/marketplace",
     "description": "Mozilla Marketplace PHP SDK",
     "minimum-stability": "stable",
     "authors": [
