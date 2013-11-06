@@ -1,6 +1,8 @@
 Marketplace PHP client
 ======================
 
+[![Build Status](https://travis-ci.org/kinncj/Marketplace.PHP.png?branch=master)](https://travis-ci.org/kinncj/Marketplace.PHP)
+
 A library to interact with Marketplace_
 
 

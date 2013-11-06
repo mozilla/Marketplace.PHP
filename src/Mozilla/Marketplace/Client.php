@@ -253,7 +253,7 @@ class Client
     {
         $content         = stream_get_contents($handle);
         $content_encoded = base64_encode($content);
-        $imginfo         = getimagesizefromstring($content);
+        $imginfo         = \getimagesizefromstring($content);
 
         if ( ! $imginfo) {
             throw new WrongFileException("Wrong file");
