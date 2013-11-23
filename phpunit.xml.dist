@@ -1,0 +1,9 @@
+<phpunit
+    bootstrap="./Tests/bootstrap.php"
+    colors="true">
+    <testsuites>
+        <testsuite name="Marketplace.PHP">
+            <directory>./Tests/</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
