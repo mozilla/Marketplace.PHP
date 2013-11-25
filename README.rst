@@ -12,7 +12,7 @@ Usage
 
 To Test::
 
-    phpunit Tests
+    phpunit
 
 Obtain your key and secret from http://marketplace.mozilla.org/developers/api
 

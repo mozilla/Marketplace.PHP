@@ -1,6 +1,4 @@
 <?php
-require_once 'PHPUnit/Autoload.php';
-require_once 'Connection.php';
 
 class MarketplaceTest extends PHPUnit_Framework_TestCase
 {

@@ -1,7 +1,4 @@
 <?php
-require_once 'PHPUnit/Autoload.php';
-require_once 'Connection.php';
-require_once 'Client.php';
 
 // Note: valid manifest url:
 // http://mozilla.github.com/MarketplaceClientExample/manifest.webapp
@@ -161,7 +158,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
             .'"resource_uri": "/api/apps/preview/12345/", '
             .'"thumbnail_url": "https://marketplace-dev-cdn.allizom.org/'
                               .'img/uploads/previews/thumbs/12/12345?modified=1348819526"}';
-        $img = "Tests/mozilla.png";
+        $img = "tests/mozilla.png";
         $handle = fopen($img, 'r');
         $stub = $this->getCurlMockFetchReturn(
             array('status_code' => 201, 'body' => $response_body));
@@ -178,7 +175,7 @@ class ClientTest extends PHPUnit_Framework_TestCase
      */
     public function testUploadWrongFile()
     {
-        $img = "Tests/ClientTest.php";
+        $img = "tests/ClientTest.php";
         $handle = fopen($img, 'r');
         $client = new Marketplace\Client(NULL);
         $response = $client->addScreenshot(12345, $handle);
