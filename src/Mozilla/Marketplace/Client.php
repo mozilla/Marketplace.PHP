@@ -10,6 +10,7 @@
 
 namespace Mozilla\Marketplace;
 
+use Mozilla\Marketplace\PHP\Register;
 
 /**
  * A class to interact with Mozilla Marketplace API
@@ -33,6 +34,11 @@ class Client
      * @var Credential $credential
      */
     private $credential;
+
+    public function __construct()
+    {
+        new Register;
+    }
 
     /**
      * @param Connection $connection
