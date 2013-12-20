@@ -43,7 +43,7 @@ class Register
         $extensionList = $this->getExtensionList();
 
         foreach ($extensionList as $extensionClass) {
-            $this->registerMethod(new $extensionClass);
+            $this->registerMethodList(new $extensionClass);
         }
     }
 
