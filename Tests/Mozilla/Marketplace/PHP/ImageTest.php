@@ -7,7 +7,7 @@
 
 namespace Mozilla\Marketplace\Test\PHP;
 
-use Mozilla\Marketplace\Test\PHP\Image;
+use Mozilla\Marketplace\PHP\Image;
 
 /**
  * Test the Register
@@ -22,7 +22,7 @@ class ImageTest extends \PHPUnit_Framework_TestCase
     {
 
         if (function_exists('getimagesizefromstring')) {
-            $this->markTestSkipped('The getimagesizefromstring function already exists');
+                $this->markTestSkipped('The getimagesizefromstring function already exists');
         }
 
         $this->image = new Image;
@@ -32,7 +32,7 @@ class ImageTest extends \PHPUnit_Framework_TestCase
 
     public function testShouldGetMethodList()
     {
-        $this->assertEquals('getimagesizefromstring', $this->image->getMethodList());
+        $this->assertEquals(array('getimagesizefromstring'), $this->image->getMethodList());
     }
 
     public function testShouldRegisterFunction()
