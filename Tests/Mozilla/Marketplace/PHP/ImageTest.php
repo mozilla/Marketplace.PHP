@@ -20,11 +20,6 @@ class ImageTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-
-        if (function_exists('getimagesizefromstring')) {
-                $this->markTestSkipped('The getimagesizefromstring function already exists');
-        }
-
         $this->image = new Image;
 
         parent::setUp();
