@@ -34,11 +34,7 @@ class Image implements Extension
     public function getimagesizefromstring()
     {
         if ( ! function_exists('getimagesizefromstring')) {
-            function getimagesizefromstring($data)
-            {
-                $uri = 'data://application/octet-stream;base64,' . base64_encode($data);
-                return getimagesize($uri);
-            }
+            require_once __DIR__.'/Extension/Zend/Standard/Image.php';
         }
     }
 }
