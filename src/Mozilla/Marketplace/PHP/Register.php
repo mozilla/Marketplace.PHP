@@ -31,7 +31,7 @@ class Register
     public function getExtensionList()
     {
         return array(
-            "Image",
+            '\Mozilla\Marketplace\PHP\Image',
         );
     }
 
@@ -50,19 +50,19 @@ class Register
     /**
      * Register functions for a given extension
      *
-     * @param mixed $object
+     * @param mixed $extension
      */
-    private function registerMethodList($object)
+    private function registerMethodList($extension)
     {
 
         if ( ! $extension instanceof Extension) {
             return;
         }
 
-        $methodList = $object->getMethodList();
+        $methodList = $extension->getMethodList();
 
         foreach ($methodList as $method) {
-            $object->$method();
+            $extension->$method();
         }
     }
 }
