@@ -10,7 +10,7 @@ namespace Mozilla\Marketplace\Test\PHP;
 use Mozilla\Marketplace\PHP\Image;
 
 /**
- * Test the Register
+ * Test the Image Extension
  *
  * @group Functional
  */

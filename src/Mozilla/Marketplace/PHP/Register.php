@@ -7,6 +7,8 @@
 
 namespace Mozilla\Marketplace\PHP;
 
+use Mozilla\Marketplace\PHP\Extension\Repository;
+
 
 /**
  * A class provide backward compatility to some PHP Extensions
@@ -24,23 +26,11 @@ class Register
     }
 
     /**
-     * Return all possible extension
-     *
-     * @return array
-     */
-    public function getExtensionList()
-    {
-        return array(
-            '\Mozilla\Marketplace\PHP\Image',
-        );
-    }
-
-    /**
      * Register the extensions
      */
     private function register()
     {
-        $extensionList = $this->getExtensionList();
+        $extensionList = Repository::getPackageList();
 
         foreach ($extensionList as $extensionClass) {
             $extension = new $extensionClass;
