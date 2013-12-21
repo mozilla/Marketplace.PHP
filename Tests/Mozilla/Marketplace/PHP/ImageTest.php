@@ -25,14 +25,9 @@ class ImageTest extends \PHPUnit_Framework_TestCase
         parent::setUp();
     }
 
-    public function testShouldGetMethodList()
-    {
-        $this->assertEquals(array('getimagesizefromstring'), $this->image->getMethodList());
-    }
-
     public function testShouldRegisterFunction()
     {
-        $this->image->getimagesizefromstring();
+        $this->image->load();
 
         $this->assertTrue(function_exists('getimagesizefromstring'));
     }

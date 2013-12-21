@@ -43,26 +43,13 @@ class Register
         $extensionList = $this->getExtensionList();
 
         foreach ($extensionList as $extensionClass) {
-            $this->registerMethodList(new $extensionClass);
-        }
-    }
+            $extension = new $extensionClass;
 
-    /**
-     * Register functions for a given extension
-     *
-     * @param mixed $extension
-     */
-    private function registerMethodList($extension)
-    {
+            if ( ! $extension instanceof Extension) {
+                continue;
+            }
 
-        if ( ! $extension instanceof Extension) {
-            return;
-        }
-
-        $methodList = $extension->getMethodList();
-
-        foreach ($methodList as $method) {
-            $extension->$method();
+            $extension->load();
         }
     }
 }

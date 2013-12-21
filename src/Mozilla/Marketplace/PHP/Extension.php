@@ -10,9 +10,7 @@ namespace Mozilla\Marketplace\PHP;
 interface Extension 
 {
     /**
-     * Return a list of methods to register
-     *
-     * @return array
+     * Load the extension file
      */
-    public function getMethodList();
+    public function load();
 }

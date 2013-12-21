@@ -21,20 +21,8 @@ class Image implements Extension
     /**
      * {@inheritdoc}
      */
-    public function getMethodList()
+    public function load()
     {
-        return array("getimagesizefromstring");
-    }
-
-    /**
-     * Make getimagesizefromstring compatible with HHVM and PHP 5.3 
-     *
-     * @return string
-     */
-    public function getimagesizefromstring()
-    {
-        if ( ! function_exists('getimagesizefromstring')) {
-            require_once __DIR__.'/Extension/Zend/Standard/Image.php';
-        }
+        require_once __DIR__.'/Extension/Zend/Standard/Image.php';
     }
 }
