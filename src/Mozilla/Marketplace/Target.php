@@ -2,7 +2,7 @@
 /**
  * Copyright 2013 - Mozilla
  *
- * @author Kinn Coelho Julão <kinncj@gmail.com>
+ * @author Kinn Coelho Julião <kinncj@gmail.com>
  */
 
 namespace Mozilla\Marketplace;
