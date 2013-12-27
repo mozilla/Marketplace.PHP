@@ -10,6 +10,7 @@
 
 namespace Mozilla\Marketplace;
 
+use Mozilla\Marketplace\PHP\Register;
 
 /**
  * A class to interact with Mozilla Marketplace API
@@ -33,6 +34,11 @@ class Client
      * @var Credential $credential
      */
     private $credential;
+
+    public function __construct()
+    {
+        new Register;
+    }
 
     /**
      * @param Connection $connection
@@ -253,7 +259,7 @@ class Client
     {
         $content         = stream_get_contents($handle);
         $content_encoded = base64_encode($content);
-        $imginfo         = getimagesizefromstring($content);
+        $imginfo         = \getimagesizefromstring($content);
 
         if ( ! $imginfo) {
             throw new WrongFileException("Wrong file");
