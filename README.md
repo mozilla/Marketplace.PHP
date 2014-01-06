@@ -22,35 +22,43 @@ Obtain your key and secret from http://marketplace.mozilla.org/developers/api
 
 Instantiate a target object::
 
-    $target = new Target;
-    //update the Target URL if necessary with $target->setUrl($url)
+```php
+$target = new Target;
+//update the Target URL if necessary with $target->setUrl($url)
+```
 
 Instantiate a credential object::
 
-    $credential = new Credential;
-    $credential->setConsumerKey(123);
-    $credential->setConsumerSecret(456);
+```php
+$credential = new Credential;
+$credential->setConsumerKey(123);
+$credential->setConsumerSecret(456);
+```
 
 Pass it to the Client::
 
-    $client = new Mozilla\Marketplace\Client;
-    $client->setTarget($target);
-    $client->setCredential($credential);
+```php
+$client = new Mozilla\Marketplace\Client;
+$client->setTarget($target);
+$client->setCredential($credential);
+```
 
 Create webapp if manifest valid::
 
-    // validate manifest
-    $response = $client->validateManifest('http://example.com/manifest.webapp');
-    echo "\n\nManifest id: ".$response['id'];
-    echo "\nManifest is ";
-    if ($response["valid"]) {
-      echo "valid - creating webapp...";
-      // create webapp
-      $response = $client->createWebapp($response['id']);
-      echo "\n\nWebapp id: ".$response['id'];
-    } else {
-      echo "invalid";
-    }
+```php
+// validate manifest
+$response = $client->validateManifest('http://example.com/manifest.webapp');
+echo "\n\nManifest id: ".$response['id'];
+echo "\nManifest is ";
+if ($response["valid"]) {
+  echo "valid - creating webapp...";
+  // create webapp
+  $response = $client->createWebapp($response['id']);
+  echo "\n\nWebapp id: ".$response['id'];
+} else {
+  echo "invalid";
+}
+```
 
 Requires
 ########
