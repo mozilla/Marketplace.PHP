@@ -18,7 +18,7 @@ To Test::
 
     ./vendor/bin/phpunir
 
-Obtain your key and secret from http://marketplace.mozilla.org/developers/api
+Obtain your key and secret from http://marketplace.firefox.org/developers/api
 
 Instantiate a target object::
 
@@ -73,4 +73,4 @@ Changelog
  - Guzzle keeps control of OAuth
  - 100% Coverage
 
-.. _Marketplace: http://marketplace.mozilla.org
+.. _Marketplace: http://marketplace.firefox.org
