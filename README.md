@@ -3,7 +3,7 @@ Marketplace PHP client
 
 [![Build Status](https://travis-ci.org/kinncj/Marketplace.PHP.png?branch=master)](https://travis-ci.org/kinncj/Marketplace.PHP)
 
-A library to interact with Marketplace_
+A library to interact with [Marketplace](https://marketplace.firefox.com/)
 
 
 Allows to validate, create and manipulate webapps and screenshots
@@ -18,7 +18,7 @@ To Test::
 
     ./vendor/bin/phpunir
 
-Obtain your key and secret from http://marketplace.mozilla.org/developers/api
+Obtain your key and secret from [Api](https://marketplace.firefox.com/developers/api)
 
 Instantiate a target object::
 
@@ -72,5 +72,3 @@ Changelog
  - Each Object can be easily injected in frameworks like SF2 and ZF2
  - Guzzle keeps control of OAuth
  - 100% Coverage
-
-.. _Marketplace: http://marketplace.mozilla.org
