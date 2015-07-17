@@ -5,29 +5,28 @@ Marketplace PHP client
 
 A library to interact with [Marketplace](https://marketplace.firefox.com/)
 
+Allows to validate, create and manipulate webapps and screenshots.
 
-Allows to validate, create and manipulate webapps and screenshots
+------------------------------------------------------
+##Usage
 
-
-Usage
-#####
-
-To Test::
-
+#####To Test:
+```
     composer install --dev
 
     ./vendor/bin/phpunir
+```
 
-Obtain your key and secret from [Api](https://marketplace.firefox.com/developers/api)
+First go and obtain your key and secret from the [Api](https://marketplace.firefox.com/developers/api)
 
-Instantiate a target object::
+#####Instantiate a target object
 
 ```php
 $target = new Target;
 //update the Target URL if necessary with $target->setUrl($url)
 ```
 
-Instantiate a credential object::
+#####Instantiate a credential object
 
 ```php
 $credential = new Credential;
@@ -35,7 +34,7 @@ $credential->setConsumerKey(123);
 $credential->setConsumerSecret(456);
 ```
 
-Pass it to the Client::
+#####Pass it to the Client
 
 ```php
 $client = new Mozilla\Marketplace\Client;
@@ -43,7 +42,7 @@ $client->setTarget($target);
 $client->setCredential($credential);
 ```
 
-Create webapp if manifest valid::
+#####Create webapp if the manifest is valid
 
 ```php
 // validate manifest
@@ -60,13 +59,11 @@ if ($response["valid"]) {
 }
 ```
 
-Requires
-########
+##Requires
 
-composer
+- composer
 
-Changelog
-########
+##Changelog
 
  - Each Object has it own responsibility
  - Each Object can be easily injected in frameworks like SF2 and ZF2
