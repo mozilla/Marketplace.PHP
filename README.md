@@ -14,7 +14,7 @@ Allows to validate, create and manipulate webapps and screenshots.
 ```
     composer install --dev
 
-    ./vendor/bin/phpunir
+    ./vendor/bin/phpunit
 ```
 
 First go and obtain your key and secret from the [Api](https://marketplace.firefox.com/developers/api)
