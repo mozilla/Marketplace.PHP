@@ -12,7 +12,7 @@ Allows to validate, create and manipulate webapps and screenshots.
 
 #####To Test:
 ```
-    composer install --dev
+    composer install
 
     ./vendor/bin/phpunir
 ```
